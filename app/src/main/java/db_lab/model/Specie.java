@@ -1,41 +1,71 @@
 package db_lab.model;
 
-/**
- * Classe che rappresenta una Specie animale
- */
-public class Specie {
-    
-    private int idSpecie;
-    private String nomeSpecie;
-    
-    // Costruttore vuoto
-    public Specie() {}
-    
-    // Costruttore completo
-    public Specie(int idSpecie, String nomeSpecie) {
-        this.idSpecie = idSpecie;
-        this.nomeSpecie = nomeSpecie;
+import db_lab.data.DAOException;
+import db_lab.data.DAOUtils;
+import db_lab.data.Printer;
+import db_lab.data.Queries;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
+public final class Specie {
+
+    public final int id;
+    public final String nome;
+
+    public Specie(int id, String nome) {
+        this.id = id;
+        this.nome = nome == null ? "" : nome;
     }
-    
-    // Getters e Setters
-    public int getIdSpecie() {
-        return idSpecie;
+
+    @Override
+    public boolean equals(Object other) {
+        if (other == this) return true;
+        if (other == null) return false;
+        if (other instanceof Specie s) {
+            return s.id == this.id && s.nome.equals(this.nome);
+        }
+        return false;
     }
-    
-    public void setIdSpecie(int idSpecie) {
-        this.idSpecie = idSpecie;
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.id, this.nome);
     }
-    
-    public String getNomeSpecie() {
-        return nomeSpecie;
-    }
-    
-    public void setNomeSpecie(String nomeSpecie) {
-        this.nomeSpecie = nomeSpecie;
-    }
-    
+
     @Override
     public String toString() {
-        return String.format("Specie[ID=%d, Nome=%s]", idSpecie, nomeSpecie);
+        return Printer.stringify("Specie", List.of(
+            Printer.field("id", this.id),
+            Printer.field("nome", this.nome)
+        ));
+    }
+
+    public static final class DAO {
+
+        public static List<Specie> list(Connection connection) {
+            try (var statement = DAOUtils.prepare(connection, Queries.LIST_SPECIE);
+                 var rs = statement.executeQuery()) {
+                var specie = new ArrayList<Specie>();
+                while (rs.next()) {
+                    specie.add(new Specie(rs.getInt("ID_specie"), rs.getString("nome_specie")));
+                }
+                return specie;
+            } catch (SQLException e) {
+                throw new DAOException(e);
+            }
+        }
+
+        public static int contaAnimali(Connection connection, int idSpecie) {
+            try (var statement = DAOUtils.prepare(connection, Queries.COUNT_ANIMALI_PER_SPECIE, idSpecie);
+                 var rs = statement.executeQuery()) {
+                if (rs.next()) return rs.getInt("totale");
+                return 0;
+            } catch (SQLException e) {
+                throw new DAOException(e);
+            }
+        }
     }
 }
