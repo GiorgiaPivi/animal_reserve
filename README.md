@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # JDBC Lab
 
 This project is meant to provide a simple example application for the students
@@ -207,3 +208,6 @@ setting up a connection.
 All other concepts are modelled directly using classes, this has the benefit of
 keeping our codebase small without burdening us with needles abstractions and
 complexity.
+=======
+# animal_reserve
+>>>>>>> 5e91a84f6039a62c6099b5c2421e00b56234ac40
