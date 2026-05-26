@@ -1,377 +1,502 @@
 package db_lab;
 
-import db_lab.model.Animale;
-import db_lab.model.ControlloSanitario;
-import db_lab.model.Specie;
-import db_lab.model.Utente;
-import java.awt.Container;
-import java.awt.Dimension;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import db_lab.model.*;
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import java.awt.*;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Consumer;
 import java.util.function.IntUnaryOperator;
-import javax.swing.BorderFactory;
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JComponent;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JTextField;
-import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
 
-public final class View {
+/**
+ * View estesa da JFrame - approccio classico simile a Cluedo
+ */
+public final class View extends JFrame {
 
     private Optional<Controller> controller;
-    private final JFrame mainFrame;
+    private final JPanel mainPanel;
+    private final CardLayout cardLayout;
 
-    public View(Runnable onClose) {
+    public View() {
+        super("Centro Recupero Animali");
         this.controller = Optional.empty();
-        this.mainFrame = this.setupMainFrame(onClose);
-    }
-
-    private JFrame setupMainFrame(Runnable onClose) {
-        var frame = new JFrame("Centro Recupero Animali");
-        var padding = BorderFactory.createEmptyBorder(10, 10, 10, 10);
-        ((JComponent) frame.getContentPane()).setBorder(padding);
-        frame.setMinimumSize(new Dimension(400, 150));
-        frame.setLayout(new BoxLayout(frame.getContentPane(), BoxLayout.PAGE_AXIS));
-        frame.pack();
-        frame.setResizable(false);
-        frame.setVisible(true);
-        frame.addWindowListener(new WindowAdapter() {
-            public void windowClosing(WindowEvent e) {
-                onClose.run();
-                System.exit(0);
-            }
-        });
-        return frame;
-    }
-
-    private Controller getController() {
-        if (this.controller.isPresent()) {
-            return this.controller.get();
-        } else {
-            throw new IllegalStateException(
-                """
-                Il Controller della View non è definito. Ricordati di chiamare
-                `setController` prima di avviare l'applicazione.
-                """
-            );
-        }
+        this.cardLayout = new CardLayout();
+        this.mainPanel = new JPanel(cardLayout);
+        
+        // Configurazione JFrame
+        this.setExtendedState(JFrame.MAXIMIZED_BOTH);
+        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        this.setLocationRelativeTo(null);
+        
+        // Aggiungo il pannello principale al frame
+        this.add(mainPanel);
+        
+        this.setVisible(true);
     }
 
     public void setController(Controller controller) {
-        Objects.requireNonNull(controller, "setController chiamato con null");
+        Objects.requireNonNull(controller);
         this.controller = Optional.of(controller);
     }
 
-    // ------- Pagine di stato -------
-
-    public void loadingAnimali() {
-        freshPane(cp -> cp.add(new JLabel("Caricamento animali...", SwingConstants.CENTER)));
+    private Controller getController() {
+        return controller.orElseThrow();
     }
 
-    public void genericError(String message) {
-        freshPane(cp -> {
-            cp.add(new JLabel("Errore: " + message, SwingConstants.CENTER));
-            cp.add(new JLabel(" "));
-            cp.add(button("Indietro", () -> this.getController().userClickedBack()));
-        });
+    // ============ UTILITY METHODS ============
+    
+    private void showPage(String pageName, JPanel panel) {
+        mainPanel.add(panel, pageName);
+        cardLayout.show(mainPanel, pageName);
     }
 
-    // ------- Login / Registrazione -------
-
-    public void loginPage() {
-        freshPane(cp -> {
-            cp.add(new JLabel("Centro Recupero Animali", SwingConstants.CENTER));
-            cp.add(new JLabel(" "));
-
-            var emailField = new JTextField(20);
-            var passwordField = new JTextField(20);
-
-            cp.add(new JLabel("Email:"));
-            cp.add(emailField);
-            cp.add(new JLabel("Password:"));
-            cp.add(passwordField);
-            cp.add(new JLabel(" "));
-
-            cp.add(button("Accedi", () -> this.getController()
-                .userSubmittedLogin(emailField.getText(), passwordField.getText())));
-            cp.add(button("Registrati come visitatore", () ->
-                this.getController().userRequestedInitialPage()
-                // mostra form registrazione
-            ));
-        });
+    private JPanel createCenteredPanel() {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setBorder(new EmptyBorder(50, 50, 50, 50));
+        return panel;
     }
 
-    public void loginFailed(String reason) {
-        freshPane(cp -> {
-            cp.add(new JLabel("Accesso fallito: " + reason, SwingConstants.CENTER));
-            cp.add(new JLabel(" "));
-            cp.add(button("Riprova", () -> this.getController().userRequestedInitialPage()));
-        });
+    private JButton createButton(String text, Runnable action) {
+        JButton button = new JButton(text);
+        button.setAlignmentX(Component.CENTER_ALIGNMENT);
+        button.addActionListener(e -> action.run());
+        return button;
     }
 
-    public void registrazioneOk() {
-        freshPane(cp -> {
-            cp.add(new JLabel("Registrazione completata! Ora puoi accedere.", SwingConstants.CENTER));
-            cp.add(new JLabel(" "));
-            cp.add(button("Vai al login", () -> this.getController().userRequestedInitialPage()));
-        });
+    private void addLabeledField(JPanel panel, String label, JComponent component) {
+        JPanel row = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        row.add(new JLabel(label));
+        row.add(component);
+        panel.add(row);
     }
 
-    public void registrazioneFailed(String reason) {
-        freshPane(cp -> {
-            cp.add(new JLabel("Registrazione fallita: " + reason, SwingConstants.CENTER));
-            cp.add(new JLabel(" "));
-            cp.add(button("Riprova", () -> this.getController().userRequestedInitialPage()));
-        });
-    }
-
-    // ------- Lista Animali -------
-
-    public void animaliPage(List<Animale> animali, Utente utente) {
-        freshPane(cp -> {
-            cp.add(new JLabel("Benvenuto/a " + utente.nome + " " + utente.cognome
-                + " [" + utente.ruolo + "]", SwingConstants.CENTER));
-            cp.add(new JLabel(" "));
-            cp.add(new JLabel("Animali nel centro (" + animali.size() + "):", SwingConstants.LEFT));
-            cp.add(new JLabel(" "));
-
-            for (var a : animali) {
-                var label = "- " + a.nome + " [" + a.nomeSpecie + "] - " + a.statoDiSalute;
-                cp.add(clickableLabel(label, () -> this.getController().userClickedAnimale(a)));
-            }
-
-            cp.add(new JLabel(" "));
-
-            // Filtri e ricerca
-            var searchField = new JTextField(15);
-            cp.add(new JLabel("Cerca per nome:"));
-            cp.add(searchField);
-            cp.add(button("Cerca", () -> this.getController()
-                .userSubmittedSearch(searchField.getText())));
-
-            var stati = new JComboBox<>(new String[]{"tutti", "buono", "discreto", "critico"});
-            cp.add(new JLabel("Filtra per stato:"));
-            cp.add(stati);
-            cp.add(button("Filtra", () -> {
-                var sel = (String) stati.getSelectedItem();
-                if ("tutti".equals(sel)) {
-                    this.getController().userClickedReloadAnimali();
-                } else {
-                    this.getController().userSelectedFiltroStato(sel);
-                }
-            }));
-
-            cp.add(new JLabel(" "));
-            cp.add(button("Visualizza specie", () -> this.getController().userClickedSpecie()));
-            cp.add(button("Ricarica", () -> this.getController().userClickedReloadAnimali()));
-
-            if (utente.isVolontario() || utente.isVeterinario()) {
-                cp.add(new JLabel(" "));
-                cp.add(button("Registra nuovo animale",
-                    () -> this.getController().userRequestedNuovoAnimale()));
-            }
-            if (utente.isVeterinario()) {
-                cp.add(button("Animali da controllare",
-                    () -> this.getController().userClickedAnimaliDaControllare()));
-            }
-
-            cp.add(new JLabel(" "));
-            cp.add(button("Logout", () -> this.getController().userClickedLogout()));
-        });
-    }
-
-    // ------- Dettaglio Animale -------
-
-    public void dettaglioAnimale(Animale animale, Utente utente) {
-        freshPane(cp -> {
-            cp.add(new JLabel("Animale: " + animale.nome));
-            cp.add(new JLabel("Specie: " + animale.nomeSpecie));
-            cp.add(new JLabel("Età: " + animale.eta + " anni"));
-            cp.add(new JLabel("Provenienza: " + animale.provenienza));
-            cp.add(new JLabel("Stato di salute: " + animale.statoDiSalute));
-            cp.add(new JLabel("Data arrivo: " + animale.dataArrivo));
-            cp.add(new JLabel("Descrizione: " + animale.descrizione));
-            cp.add(new JLabel(" "));
-
-            if (utente.isVolontario() || utente.isVeterinario()) {
-                var nuovoStato = new JComboBox<>(new String[]{"buono", "discreto", "critico"});
-                nuovoStato.setSelectedItem(animale.statoDiSalute);
-                cp.add(new JLabel("Aggiorna stato:"));
-                cp.add(nuovoStato);
-                cp.add(button("Salva stato", () -> this.getController()
-                    .userSubmittedAggiornaStato(animale.id, (String) nuovoStato.getSelectedItem())));
-                cp.add(new JLabel(" "));
-            }
-
-            if (utente.isVeterinario()) {
-                cp.add(button("Storico controlli",
-                    () -> this.getController().userClickedStoricoControlli(animale.id)));
-
-                cp.add(new JLabel(" "));
-                cp.add(new JLabel("Nuovo controllo:"));
-                var tipologie = new JComboBox<>(new String[]{
-                    "visita di routine", "esami delle feci",
-                    "valutazione respiratoria", "valutazione cardiaca"});
-                var esiti = new JComboBox<>(new String[]{"positivo", "negativo", "da monitorare"});
-                cp.add(new JLabel("Tipologia:")); cp.add(tipologie);
-                cp.add(new JLabel("Esito:")); cp.add(esiti);
-                cp.add(button("Registra controllo", () -> this.getController()
-                    .userSubmittedNuovoControllo(animale.id,
-                        (String) tipologie.getSelectedItem(),
-                        (String) esiti.getSelectedItem())));
-            }
-
-            cp.add(new JLabel(" "));
-            cp.add(button("Indietro", () -> this.getController().userClickedBack()));
-        });
-    }
-
-    // ------- Specie -------
-
-    public void speciePage(List<Specie> specie, IntUnaryOperator contaAnimali) {
-        freshPane(cp -> {
-            cp.add(new JLabel("Specie nel centro:", SwingConstants.CENTER));
-            cp.add(new JLabel(" "));
-            for (var s : specie) {
-                int count = contaAnimali.applyAsInt(s.id);
-                cp.add(new JLabel("- " + s.nome + " (" + count + " animali)"));
-            }
-            cp.add(new JLabel(" "));
-            cp.add(button("Indietro", () -> this.getController().userClickedBack()));
-        });
-    }
-
-    // ------- Form Nuovo Animale -------
-
-    public void nuovoAnimaleForm(List<Specie> specie) {
-        freshPane(cp -> {
-            cp.add(new JLabel("Registra nuovo animale", SwingConstants.CENTER));
-            cp.add(new JLabel(" "));
-
-            var nomeField = new JTextField(15);
-            var etaField = new JTextField(5);
-            var provenienzaField = new JTextField(15);
-            var descrizioneField = new JTextField(20);
-            var stati = new JComboBox<>(new String[]{"buono", "discreto", "critico"});
-            var specieBox = new JComboBox<>(specie.stream().map(s -> s.nome).toArray(String[]::new));
-
-            cp.add(new JLabel("Nome:")); cp.add(nomeField);
-            cp.add(new JLabel("Età:")); cp.add(etaField);
-            cp.add(new JLabel("Provenienza:")); cp.add(provenienzaField);
-            cp.add(new JLabel("Descrizione:")); cp.add(descrizioneField);
-            cp.add(new JLabel("Stato:")); cp.add(stati);
-            cp.add(new JLabel("Specie:")); cp.add(specieBox);
-            cp.add(new JLabel(" "));
-
-            cp.add(button("Registra", () -> {
-                try {
-                    int eta = Integer.parseInt(etaField.getText().trim());
-                    int idxSpecie = specieBox.getSelectedIndex();
-                    this.getController().userSubmittedNuovoAnimale(
-                        nomeField.getText(), eta, provenienzaField.getText(),
-                        (String) stati.getSelectedItem(),
-                        descrizioneField.getText(),
-                        specie.get(idxSpecie).id
-                    );
-                } catch (NumberFormatException ex) {
-                    cp.add(new JLabel("Età non valida!"));
-                    cp.validate(); cp.repaint(); mainFrame.pack();
-                }
-            }));
-            cp.add(button("Annulla", () -> this.getController().userClickedBack()));
-        });
-    }
-
-    // ------- Feedback operazioni -------
-
-    public void animaleRegistrato(int id) {
-        freshPane(cp -> {
-            cp.add(new JLabel("Animale registrato con ID: " + id, SwingConstants.CENTER));
-            cp.add(new JLabel(" "));
-            cp.add(button("Torna alla lista", () -> this.getController().userClickedReloadAnimali()));
-        });
-    }
-
-    public void statoAggiornato() {
-        // Il controller chiama subito loadAnimaliPage, non serve una pagina dedicata
-    }
-
-    public void controlloRegistrato(int id) {
-        freshPane(cp -> {
-            cp.add(new JLabel("Controllo registrato con ID: " + id, SwingConstants.CENTER));
-            cp.add(new JLabel(" "));
-            cp.add(button("Indietro", () -> this.getController().userClickedBack()));
-        });
-    }
-
-    public void terapiaRegistrata(int id) {
-        freshPane(cp -> {
-            cp.add(new JLabel("Terapia prescritta con ID: " + id, SwingConstants.CENTER));
-            cp.add(new JLabel(" "));
-            cp.add(button("Indietro", () -> this.getController().userClickedBack()));
-        });
-    }
-
-    // ------- Storico controlli -------
-
-    public void storicoControlliPage(List<ControlloSanitario> controlli) {
-        freshPane(cp -> {
-            cp.add(new JLabel("Storico controlli sanitari:", SwingConstants.CENTER));
-            cp.add(new JLabel(" "));
-            if (controlli.isEmpty()) {
-                cp.add(new JLabel("Nessun controllo registrato.", SwingConstants.CENTER));
-            } else {
-                for (var c : controlli) {
-                    cp.add(new JLabel("• " + c.data + " " + c.ora
-                        + " | " + c.tipologia + " → " + c.esito));
-                }
-            }
-            cp.add(new JLabel(" "));
-            cp.add(button("Indietro", () -> this.getController().userClickedBack()));
-        });
-    }
-
-    // ------- Private helpers -------
-
-    private JButton button(String label, Runnable action) {
-        var btn = new JButton(label);
-        btn.addActionListener(event -> {
-            btn.setEnabled(false);
-            SwingUtilities.invokeLater(() -> {
-                action.run();
-                btn.setEnabled(true);
-            });
-        });
-        return btn;
-    }
-
-    private JLabel clickableLabel(String labelText, Runnable action) {
-        var label = new JLabel(labelText);
-        label.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                SwingUtilities.invokeLater(action::run);
-            }
-        });
+    private JLabel createInfoLabel(String text) {
+        JLabel label = new JLabel(text);
+        label.setFont(new Font("Arial", Font.PLAIN, 14));
         return label;
     }
 
-    private void freshPane(Consumer<Container> consumer) {
-        var cp = this.mainFrame.getContentPane();
-        cp.removeAll();
-        consumer.accept(cp);
-        cp.validate();
-        cp.repaint();
-        this.mainFrame.pack();
+    // ============ PAGES ============
+
+    public void loadingAnimali() {
+        JPanel panel = createCenteredPanel();
+        JLabel loadingLabel = new JLabel("Caricamento animali...");
+        loadingLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        loadingLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panel.add(loadingLabel);
+        showPage("loading", panel);
+    }
+
+    public void genericError(String msg) {
+        JOptionPane.showMessageDialog(this, msg, "Errore", JOptionPane.ERROR_MESSAGE);
+    }
+
+    public void genericMessage(String msg) {
+        JOptionPane.showMessageDialog(this, msg, "Messaggio", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    // ============ LOGIN ============
+
+    public void loginPage() {
+        JPanel panel = createCenteredPanel();
+        
+        JLabel title = new JLabel("Centro Recupero Animali");
+        title.setFont(new Font("Arial", Font.BOLD, 24));
+        title.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panel.add(title);
+        panel.add(Box.createVerticalStrut(30));
+
+        JTextField email = new JTextField(20);
+        JPasswordField pass = new JPasswordField(20);
+
+        addLabeledField(panel, "Email:", email);
+        addLabeledField(panel, "Password:", pass);
+        panel.add(Box.createVerticalStrut(20));
+
+        JButton loginBtn = createButton("Accedi", () -> 
+            getController().userSubmittedLogin(email.getText(), new String(pass.getPassword())));
+        panel.add(loginBtn);
+        
+        panel.add(Box.createVerticalStrut(10));
+        
+        JButton registerBtn = createButton("Registrati", () -> registrazionePage());
+        panel.add(registerBtn);
+
+        showPage("login", panel);
+    }
+
+    public void loginFailed(String reason) {
+        genericError(reason);
+        loginPage();
+    }
+
+    // ============ REGISTRAZIONE ============
+
+    public void registrazionePage() {
+        JPanel panel = createCenteredPanel();
+        
+        JLabel title = new JLabel("Nuova Registrazione");
+        title.setFont(new Font("Arial", Font.BOLD, 20));
+        title.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panel.add(title);
+        panel.add(Box.createVerticalStrut(20));
+        
+        JTextField nome = new JTextField(20);
+        JTextField cognome = new JTextField(20);
+        JTextField email = new JTextField(20);
+        JPasswordField pass = new JPasswordField(20);
+
+        addLabeledField(panel, "Nome:", nome);
+        addLabeledField(panel, "Cognome:", cognome);
+        addLabeledField(panel, "Email:", email);
+        addLabeledField(panel, "Password:", pass);
+        panel.add(Box.createVerticalStrut(20));
+
+        JButton regBtn = createButton("Registrati", () ->
+            getController().userSubmittedRegistrazione(
+                nome.getText(), cognome.getText(), 
+                email.getText(), new String(pass.getPassword())
+            )
+        );
+        panel.add(regBtn);
+        
+        panel.add(Box.createVerticalStrut(10));
+        
+        JButton backBtn = createButton("Torna al Login", () -> loginPage());
+        panel.add(backBtn);
+
+        showPage("registrazione", panel);
+    }
+
+    public void registrazioneOk() {
+        genericMessage("Registrazione completata!");
+        loginPage();
+    }
+
+    public void registrazioneFailed(String reason) {
+        genericError(reason);
+    }
+
+    // ============ LISTA ANIMALI ============
+
+    public void animaliPage(List<Animale> animali, Utente utente) {
+        JPanel mainContent = new JPanel(new BorderLayout());
+        mainContent.setBorder(new EmptyBorder(20, 20, 20, 20));
+
+        // Header
+        JPanel header = new JPanel(new BorderLayout());
+        JLabel welcome = new JLabel("Benvenuto " + utente.nome + " " + utente.cognome + " [" + utente.ruolo + "]");
+        welcome.setFont(new Font("Arial", Font.BOLD, 16));
+        header.add(welcome, BorderLayout.WEST);
+        
+        JButton logoutBtn = new JButton("Logout");
+        logoutBtn.addActionListener(e -> getController().userClickedLogout());
+        header.add(logoutBtn, BorderLayout.EAST);
+        
+        mainContent.add(header, BorderLayout.NORTH);
+
+        // Lista animali con scroll
+        JPanel listPanel = new JPanel();
+        listPanel.setLayout(new BoxLayout(listPanel, BoxLayout.Y_AXIS));
+        
+        JLabel count = new JLabel("Animali nel centro: " + animali.size());
+        count.setFont(new Font("Arial", Font.BOLD, 14));
+        listPanel.add(count);
+        listPanel.add(Box.createVerticalStrut(20));
+
+        for (Animale a : animali) {
+            JPanel animalRow = new JPanel(new BorderLayout());
+            animalRow.setBorder(BorderFactory.createLineBorder(Color.GRAY));
+            animalRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, 60));
+            
+            JLabel info = new JLabel("  " + a.nome + " - " + a.nomeSpecie + " (età: " + a.eta + ") - " + a.statoDiSalute);
+            animalRow.add(info, BorderLayout.CENTER);
+            
+            JButton detailBtn = new JButton("Dettagli");
+            detailBtn.addActionListener(e -> getController().userClickedAnimale(a));
+            animalRow.add(detailBtn, BorderLayout.EAST);
+            
+            listPanel.add(animalRow);
+            listPanel.add(Box.createVerticalStrut(5));
+        }
+
+        JScrollPane scrollPane = new JScrollPane(listPanel);
+        mainContent.add(scrollPane, BorderLayout.CENTER);
+
+        // Pulsanti azioni
+        JPanel actionsPanel = new JPanel(new FlowLayout());
+        
+        if (utente.isVeterinario()) {
+            actionsPanel.add(createButton("Nuovo Animale", () -> getController().userRequestedNuovoAnimale()));
+        }
+        actionsPanel.add(createButton("Specie", () -> getController().userClickedSpecie()));
+        actionsPanel.add(createButton("Recinti", () -> getController().userClickedRecinti()));
+        actionsPanel.add(createButton("Trasporti", () -> getController().userClickedTuttiTrasporti()));
+        actionsPanel.add(createButton("Statistiche", () -> getController().userClickedStatisticheGenerali()));
+        
+        mainContent.add(actionsPanel, BorderLayout.SOUTH);
+
+        showPage("animali", mainContent);
+    }
+
+    // ============ DETTAGLIO ANIMALE ============
+
+    public void dettaglioAnimale(Animale a, Utente u) {
+        JPanel outerPanel = new JPanel(new BorderLayout());
+        JPanel panel = createCenteredPanel();
+
+        JLabel titleLabel = new JLabel("Dettaglio Animale: " + a.nome);
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 18));
+        titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panel.add(titleLabel);
+        panel.add(Box.createVerticalStrut(20));
+
+        panel.add(createInfoLabel("Nome: " + a.nome));
+        panel.add(createInfoLabel("Specie: " + a.nomeSpecie));
+        panel.add(createInfoLabel("Età: " + a.eta));
+        panel.add(createInfoLabel("Provenienza: " + a.provenienza));
+        panel.add(createInfoLabel("Stato di salute: " + a.statoDiSalute));
+        panel.add(createInfoLabel("Data arrivo: " + a.dataArrivo));
+        panel.add(createInfoLabel("Descrizione: " + a.descrizione));
+        panel.add(Box.createVerticalStrut(20));
+
+        if (u.isVolontario() || u.isVeterinario()) {
+            JComboBox<String> nuovoStato = new JComboBox<>(new String[]{"buono", "discreto", "critico"});
+            nuovoStato.setSelectedItem(a.statoDiSalute);
+            addLabeledField(panel, "Aggiorna stato:", nuovoStato);
+            panel.add(createButton("Salva stato", () ->
+                getController().userSubmittedAggiornaStato(a.id, (String) nuovoStato.getSelectedItem())));
+            panel.add(Box.createVerticalStrut(20));
+        }
+
+        if (u.isVeterinario()) {
+            panel.add(createButton("Storico controlli", () -> 
+                getController().userClickedStoricoControlli(a.id)));
+            panel.add(Box.createVerticalStrut(10));
+
+            JComboBox<String> tipo = new JComboBox<>(new String[]{
+                "visita di routine", "esami delle feci", "valutazione respiratoria", "valutazione cardiaca"
+            });
+            JComboBox<String> esito = new JComboBox<>(new String[]{"positivo", "negativo", "da monitorare"});
+
+            addLabeledField(panel, "Tipologia controllo:", tipo);
+            addLabeledField(panel, "Esito:", esito);
+            panel.add(createButton("Registra controllo", () ->
+                getController().userSubmittedNuovoControllo(a.id,
+                    (String) tipo.getSelectedItem(),
+                    (String) esito.getSelectedItem())));
+        }
+
+        panel.add(Box.createVerticalStrut(20));
+        panel.add(createButton("Indietro", () -> getController().userClickedBack()));
+
+        JScrollPane scrollPane = new JScrollPane(panel);
+        outerPanel.add(scrollPane, BorderLayout.CENTER);
+        
+        showPage("dettaglio", outerPanel);
+    }
+
+    // ============ SPECIE ============
+
+    public void speciePage(List<Specie> specie, IntUnaryOperator conta) {
+        JPanel outerPanel = new JPanel(new BorderLayout());
+        JPanel panel = createCenteredPanel();
+
+        JLabel title = new JLabel("Elenco Specie");
+        title.setFont(new Font("Arial", Font.BOLD, 18));
+        title.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panel.add(title);
+        panel.add(Box.createVerticalStrut(20));
+
+        for (Specie s : specie) {
+            panel.add(new JLabel("• " + s.nome + " (" + conta.applyAsInt(s.id) + " animali)"));
+        }
+
+        panel.add(Box.createVerticalStrut(20));
+        panel.add(createButton("Indietro", () -> getController().userClickedBack()));
+
+        JScrollPane scrollPane = new JScrollPane(panel);
+        outerPanel.add(scrollPane, BorderLayout.CENTER);
+        
+        showPage("specie", outerPanel);
+    }
+
+    // ============ NUOVO ANIMALE ============
+
+    public void nuovoAnimaleForm(List<Specie> specie) {
+        JPanel outerPanel = new JPanel(new BorderLayout());
+        JPanel panel = createCenteredPanel();
+
+        JLabel titleLabel = new JLabel("Registra Nuovo Animale");
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 18));
+        titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panel.add(titleLabel);
+        panel.add(Box.createVerticalStrut(20));
+
+        JTextField nome = new JTextField(20);
+        JTextField eta = new JTextField(20);
+        JTextField provenienza = new JTextField(20);
+        JTextField stato = new JTextField(20);
+        JTextField descr = new JTextField(20);
+        JComboBox<Specie> combo = new JComboBox<>(specie.toArray(new Specie[0]));
+
+        addLabeledField(panel, "Nome:", nome);
+        addLabeledField(panel, "Età:", eta);
+        addLabeledField(panel, "Provenienza:", provenienza);
+        addLabeledField(panel, "Stato:", stato);
+        addLabeledField(panel, "Descrizione:", descr);
+        addLabeledField(panel, "Specie:", combo);
+
+        panel.add(Box.createVerticalStrut(20));
+        panel.add(createButton("Registra", () -> {
+            try {
+                getController().userSubmittedNuovoAnimale(
+                    nome.getText(),
+                    Integer.parseInt(eta.getText()),
+                    provenienza.getText(),
+                    stato.getText(),
+                    descr.getText(),
+                    ((Specie) combo.getSelectedItem()).id
+                );
+            } catch (Exception ex) {
+                genericError("Errore nei dati inseriti.");
+            }
+        }));
+
+        JScrollPane scrollPane = new JScrollPane(panel);
+        outerPanel.add(scrollPane, BorderLayout.CENTER);
+        
+        showPage("nuovoAnimale", outerPanel);
+    }
+
+    public void animaleRegistrato(int id) {
+        genericMessage("Animale registrato con ID: " + id);
+    }
+
+    public void statoAggiornato() {
+        genericMessage("Stato aggiornato.");
+    }
+
+    public void controlloRegistrato(int id) {
+        genericMessage("Controllo registrato con ID: " + id);
+    }
+
+    // ============ STORICO CONTROLLI ============
+
+    public void storicoControlliPage(List<ControlloSanitario> controlli) {
+        JPanel outerPanel = new JPanel(new BorderLayout());
+        JPanel panel = createCenteredPanel();
+
+        JLabel title = new JLabel("Storico Controlli Sanitari");
+        title.setFont(new Font("Arial", Font.BOLD, 18));
+        title.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panel.add(title);
+        panel.add(Box.createVerticalStrut(20));
+
+        for (ControlloSanitario c : controlli) {
+            panel.add(new JLabel("• " + c.data + " - " + c.tipologia + " - " + c.esito));
+        }
+
+        panel.add(Box.createVerticalStrut(20));
+        panel.add(createButton("Indietro", () -> getController().userClickedBack()));
+
+        JScrollPane scrollPane = new JScrollPane(panel);
+        outerPanel.add(scrollPane, BorderLayout.CENTER);
+        
+        showPage("storico", outerPanel);
+    }
+
+    public void terapiaRegistrata(int id) {
+        genericMessage("Terapia registrata con ID: " + id);
+    }
+
+    // ============ LISTE GENERICHE ============
+
+    public void movimentazioniPage(List<?> mov) {
+        showGenericListPage("Movimentazioni", mov);
+    }
+
+    public void trasportiPage(List<?> trasporti) {
+        showGenericListPage("Trasporti", trasporti);
+    }
+
+    public void terapiePage(List<?> terapie) {
+        showGenericListPage("Terapie", terapie);
+    }
+
+    public void recintPage(List<?> recinti) {
+        showGenericListPage("Recinti", recinti);
+    }
+
+    private void showGenericListPage(String title, List<?> items) {
+        JPanel outerPanel = new JPanel(new BorderLayout());
+        JPanel panel = createCenteredPanel();
+
+        JLabel titleLabel = new JLabel(title);
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 18));
+        titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panel.add(titleLabel);
+        panel.add(Box.createVerticalStrut(20));
+
+        for (Object item : items) {
+            panel.add(new JLabel("• " + item.toString()));
+        }
+
+        panel.add(Box.createVerticalStrut(20));
+        panel.add(createButton("Indietro", () -> getController().userClickedBack()));
+
+        JScrollPane scrollPane = new JScrollPane(panel);
+        outerPanel.add(scrollPane, BorderLayout.CENTER);
+        
+        showPage(title.toLowerCase(), outerPanel);
+    }
+
+    // ============ DETTAGLIO RECINTO ============
+
+    public void dettaglioRecinto(Object recinto, int numAnimali) {
+        JPanel panel = createCenteredPanel();
+
+        JLabel titleLabel = new JLabel("Dettaglio Recinto");
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 18));
+        titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panel.add(titleLabel);
+        panel.add(Box.createVerticalStrut(20));
+
+        panel.add(new JLabel(recinto.toString()));
+        panel.add(new JLabel("Animali presenti: " + numAnimali));
+        panel.add(Box.createVerticalStrut(20));
+        panel.add(createButton("Indietro", () -> getController().userClickedBack()));
+
+        showPage("dettaglioRecinto", panel);
+    }
+
+    // ============ STATISTICHE ============
+
+    public void showStatistiche(Map<String, Object> stats) {
+        JPanel outerPanel = new JPanel(new BorderLayout());
+        JPanel panel = createCenteredPanel();
+
+        JLabel title = new JLabel("Statistiche Centro");
+        title.setFont(new Font("Arial", Font.BOLD, 18));
+        title.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panel.add(title);
+        panel.add(Box.createVerticalStrut(20));
+
+        for (Map.Entry<String, Object> e : stats.entrySet()) {
+            JLabel stat = new JLabel("• " + e.getKey() + ": " + e.getValue());
+            stat.setFont(new Font("Arial", Font.PLAIN, 14));
+            panel.add(stat);
+        }
+
+        panel.add(Box.createVerticalStrut(20));
+        panel.add(createButton("Indietro", () -> getController().userClickedBack()));
+
+        JScrollPane scrollPane = new JScrollPane(panel);
+        outerPanel.add(scrollPane, BorderLayout.CENTER);
+        
+        showPage("statistiche", outerPanel);
     }
 }

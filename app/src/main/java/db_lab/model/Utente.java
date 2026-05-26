@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-public final class Utente {
+public class Utente {
 
     public final int id;
     public final String nome;
@@ -136,4 +136,9 @@ public final class Utente {
             }
         }
     }
+
+    public boolean isAdmin() {
+        return !ruolo.equalsIgnoreCase("visitatore");
+    }
+
 }

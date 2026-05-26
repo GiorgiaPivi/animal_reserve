@@ -102,5 +102,30 @@ public final class Terapia {
                 throw new DAOException(e);
             }
         }
+
+        public static List<Terapia> listByControllo(Connection connection, int idControllo) {
+            return byControllo(connection, idControllo);
+        }
+
+        public static List<Terapia> listByAnimale(Connection connection, int idAnimale) {
+            try (var statement = DAOUtils.prepare(connection, Queries.LIST_TERAPIE_BY_ANIMALE, idAnimale);
+                 var rs = statement.executeQuery()) {
+                var terapie = new ArrayList<Terapia>();
+                while (rs.next()) {
+                    terapie.add(new Terapia(
+                        rs.getInt("ID_terapia"),
+                        rs.getString("farmaco"),
+                        rs.getString("dosaggio"),
+                        rs.getString("durata"),
+                        rs.getDate("data_inizio").toLocalDate(),
+                        rs.getDate("data_fine").toLocalDate(),
+                        rs.getInt("ID_controllo")
+                    ));
+                }
+                return terapie;
+            } catch (SQLException e) {
+                throw new DAOException(e);
+            }
+        }
     }
 }

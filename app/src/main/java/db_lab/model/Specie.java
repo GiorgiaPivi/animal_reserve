@@ -67,5 +67,14 @@ public final class Specie {
                 throw new DAOException(e);
             }
         }
+
+        public static void insert(Connection connection, String nome) {
+            try (var statement = connection.prepareStatement(Queries.INSERT_SPECIE)) {
+                statement.setString(1, nome);
+                statement.executeUpdate();
+            } catch (SQLException e) {
+                throw new DAOException(e);
+            }
+        }
     }
 }

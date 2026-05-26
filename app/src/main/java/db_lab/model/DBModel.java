@@ -119,4 +119,132 @@ public final class DBModel implements Model {
         return Terapia.DAO.insert(connection, farmaco, dosaggio, durata,
             dataInizio, dataFine, idControllo);
     }
+
+    @Override
+    public List<Terapia> terapieByAnimale(int idAnimale) {
+        return Terapia.DAO.listByAnimale(connection, idAnimale);
+    }
+
+    @Override
+    public List<Terapia> terapieByControllo(int idControllo) {
+        return Terapia.DAO.listByControllo(connection, idControllo);
+    }
+
+    // ------- Recinto -------
+
+    @Override
+    public List<Recinto> recinti() {
+        return Recinto.DAO.list(connection);
+    }
+
+    @Override
+    public List<Recinto> recintiDisponibili() {
+        return Recinto.DAO.disponibili(connection);
+    }
+
+    @Override
+    public Optional<Recinto> findRecinto(int idRecinto) {
+        return Recinto.DAO.find(connection, idRecinto);
+    }
+
+    @Override
+    public int contaAnimaliInRecinto(int idRecinto) {
+        return Recinto.DAO.contaAnimali(connection, idRecinto);
+    }
+
+    // ------- Movimentazione -------
+
+    @Override
+    public int insertMovimentazione(LocalDate dataMovimentazione, int idAnimale, int idRecintoDestinazione) {
+        return Movimentazione.DAO.insert(connection, dataMovimentazione, idAnimale, idRecintoDestinazione);
+    }
+
+    @Override
+    public List<Movimentazione> movimentazioniByAnimale(int idAnimale) {
+        return Movimentazione.DAO.listByAnimale(connection, idAnimale);
+    }
+
+    // ------- Trasporto Esterno -------
+
+    @Override
+    public int insertTrasporto(LocalDate dataTrasporto, String destinazione, String motivazione,
+                                int idAnimale, int idVolontario) {
+        return TrasportoEsterno.DAO.insert(connection, dataTrasporto, destinazione, motivazione,
+            idAnimale, idVolontario);
+    }
+
+    @Override
+    public List<TrasportoEsterno> trasportiByAnimale(int idAnimale) {
+        return TrasportoEsterno.DAO.listByAnimale(connection, idAnimale);
+    }
+
+    @Override
+    public List<TrasportoEsterno> allTrasporti() {
+        return TrasportoEsterno.DAO.listAll(connection);
+    }
+
+    // ------- Statistiche -------
+
+    @Override
+    public int contaAnimaliTotali() {
+        return Animale.DAO.contaTotali(connection);
+    }
+
+    @Override
+    public java.util.Map<String, Integer> contaAnimaliPerStato() {
+        return Animale.DAO.contaPerStato(connection);
+    }
+
+    @Override
+    public int contaControlliUltimi30Giorni() {
+        return ControlloSanitario.DAO.contaUltimi30Giorni(connection);
+    }
+
+    @Override
+    public java.util.Map<String, Object> statisticheGenerali() {
+        var stats = new java.util.HashMap<String, Object>();
+
+        stats.put("Totale animali", this.contaAnimaliTotali());
+        stats.put("Animali per stato", this.contaAnimaliPerStato());
+        stats.put("Controlli ultimi 30 giorni", this.contaControlliUltimi30Giorni());
+
+        return stats;
+    }
+
+    @Override
+    public java.util.Map<String, Object> statisticheSanitarie() {
+        var stats = new java.util.HashMap<String, Object>();
+
+        stats.put("Controlli ultimi 30 giorni", this.contaControlliUltimi30Giorni());
+        stats.put("Animali per stato di salute", this.contaAnimaliPerStato());
+
+        return stats;
+    }
+    @Override
+    public void insertSpecie(String nome) {
+        Specie.DAO.insert(connection, nome);
+    }
+
+    @Override
+    public void insertRecinto(String tipologia) {
+        Recinto.DAO.insert(connection, tipologia);
+    }
+
+    @Override
+    public void insertTurno(LocalDate data, String fascia) {
+        Turno.DAO.insert(connection, data, fascia);
+    }
+
+    @Override
+    public void assegnaTurno(int idUtente, LocalDate data, String fascia) {
+        Turno.DAO.assegna(connection, idUtente, data, fascia);
+    }
+
+    @Override
+    public void insertMansione(String descrizione) {
+        Mansione.DAO.insert(connection, descrizione);
+    }
+
+
+
 }

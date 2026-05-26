@@ -32,12 +32,17 @@ public final class Queries {
         SELECT COUNT(*) AS totale FROM Animale WHERE ID_specie = ?
         """;
 
+    public static final String INSERT_SPECIE =
+        "INSERT INTO SPECIE (nome_specie) VALUES (?)";
     // ------- Recinto -------
 
     public static final String LIST_RECINTI =
         """
         SELECT * FROM Recinto ORDER BY ID_recinto
         """;
+
+    public static final String INSERT_RECINTO =
+        "INSERT INTO RECINTO (tipo_recinto) VALUES (?)";
 
     // ------- Animale -------
 
@@ -128,4 +133,163 @@ public final class Queries {
         """
         SELECT * FROM Terapia WHERE ID_controllo = ?
         """;
+
+    public static final String LIST_TERAPIE_BY_ANIMALE =
+        """
+        SELECT T.*, CS.data AS data_controllo, CS.tipologia AS tipo_controllo
+        FROM Terapia T
+        JOIN Controllo_Sanitario CS ON T.ID_controllo = CS.ID_controllo
+        WHERE CS.ID_animale = ?
+        ORDER BY T.data_inizio DESC
+        """;
+
+    public static final String UPDATE_TERAPIA =
+        """
+        UPDATE Terapia 
+        SET farmaco = ?, dosaggio = ?, durata = ?, data_fine = ?
+        WHERE ID_terapia = ?
+        """;
+
+    // ------- Movimentazione -------
+
+    public static final String INSERT_MOVIMENTAZIONE =
+        """
+        INSERT INTO Movimentazione (data_movimentazione, ID_animale, ID_recinto_destinazione)
+        VALUES (?, ?, ?)
+        """;
+
+    public static final String LIST_MOVIMENTAZIONI_BY_ANIMALE =
+        """
+        SELECT M.*, R.tipo_recinto, R.capienza
+        FROM Movimentazione M
+        JOIN Recinto R ON M.ID_recinto_destinazione = R.ID_recinto
+        WHERE M.ID_animale = ?
+        ORDER BY M.data_movimentazione DESC
+        """;
+
+    public static final String FIND_RECINTO_BY_ID =
+        """
+        SELECT * FROM Recinto WHERE ID_recinto = ?
+        """;
+
+    public static final String COUNT_ANIMALI_IN_RECINTO =
+        """
+        SELECT COUNT(*) AS totale FROM Animale WHERE ID_recinto = ?
+        """;
+
+    public static final String RECINTI_DISPONIBILI =
+        """
+        SELECT R.*, 
+            (SELECT COUNT(*) FROM Animale WHERE ID_recinto = R.ID_recinto) AS occupazione
+        FROM Recinto R
+        WHERE (SELECT COUNT(*) FROM Animale WHERE ID_recinto = R.ID_recinto) < R.capienza
+        ORDER BY R.tipo_recinto, R.ID_recinto
+        """;
+
+    // ------- Trasporto Esterno -------
+
+    public static final String INSERT_TRASPORTO =
+        """
+        INSERT INTO Trasporto_Esterno 
+        (data_trasporto, destinazione, motivazione, ID_animale, ID_volontario)
+        VALUES (?, ?, ?, ?, ?)
+        """;
+
+    public static final String LIST_TRASPORTI_BY_ANIMALE =
+        """
+        SELECT TE.*, U.nome AS nome_volontario, U.cognome AS cognome_volontario
+        FROM Trasporto_Esterno TE
+        JOIN Utente U ON TE.ID_volontario = U.ID_utente
+        WHERE TE.ID_animale = ?
+        ORDER BY TE.data_trasporto DESC
+        """;
+
+    public static final String LIST_ALL_TRASPORTI =
+        """
+        SELECT TE.*, A.nome_animale, U.nome AS nome_volontario, U.cognome AS cognome_volontario
+        FROM Trasporto_Esterno TE
+        JOIN Animale A ON TE.ID_animale = A.ID_animale
+        JOIN Utente U ON TE.ID_volontario = U.ID_utente
+        ORDER BY TE.data_trasporto DESC
+        """;
+
+    // ------- Statistiche / Dashboard -------
+
+    public static final String CONTA_ANIMALI_TOTALI =
+        """
+        SELECT COUNT(*) AS totale FROM Animale
+        """;
+
+    public static final String CONTA_ANIMALI_PER_STATO =
+        """
+        SELECT stato_di_salute, COUNT(*) AS totale 
+        FROM Animale 
+        GROUP BY stato_di_salute
+        """;
+
+    public static final String CONTA_CONTROLLI_ULTIMI_30_GIORNI =
+        """
+        SELECT COUNT(*) AS totale 
+        FROM Controllo_Sanitario 
+        WHERE data >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+        """;
+
+    public static final String ANIMALI_PIU_RECENTI =
+        """
+        SELECT A.*, S.nome_specie
+        FROM Animale A
+        JOIN Specie S ON A.ID_specie = S.ID_specie
+        ORDER BY A.data_arrivo DESC
+        LIMIT 5
+        """;
+
+    public static final String SPECIE_PIU_NUMEROSE =
+        """
+        SELECT S.nome_specie, COUNT(A.ID_animale) AS totale
+        FROM Specie S
+        LEFT JOIN Animale A ON S.ID_specie = A.ID_specie
+        GROUP BY S.ID_specie, S.nome_specie
+        ORDER BY totale DESC
+        LIMIT 5
+        """;
+
+    public static final String RECINTI_OCCUPAZIONE =
+        """
+        SELECT R.ID_recinto, R.tipo_recinto, R.capienza,
+            COUNT(A.ID_animale) AS occupati
+        FROM Recinto R
+        LEFT JOIN Animale A ON R.ID_recinto = A.ID_recinto
+        GROUP BY R.ID_recinto, R.tipo_recinto, R.capienza
+        ORDER BY R.ID_recinto
+        """;
+
+    // ------- Dettaglio Controllo -------
+
+    public static final String FIND_CONTROLLO =
+        """
+        SELECT CS.*, A.nome_animale, U.nome AS nome_vet, U.cognome AS cognome_vet
+        FROM Controllo_Sanitario CS
+        JOIN Animale A ON CS.ID_animale = A.ID_animale
+        JOIN Utente U ON CS.ID_veterinario = U.ID_utente
+        WHERE CS.ID_controllo = ?
+        """;
+
+    // ------- Turno -------
+    public static final String INSERT_TURNO =
+    "INSERT INTO TURNO (data, fascia_oraria) VALUES (?, ?)";
+
+    public static final String ASSIGN_TURNO =
+        "INSERT INTO SVOLGIMENTO (ID_utente, data, fascia_oraria) VALUES (?, ?, ?)";
+
+    public static final String LIST_TURNI =
+        "SELECT data, fascia_oraria FROM TURNO ORDER BY data, fascia_oraria";
+    
+    // ------- Mansioni -------
+    public static final String INSERT_MANSIONE =
+    "INSERT INTO MANSIONE (descrizione) VALUES (?)";
+
+    public static final String LIST_MANSIONI =
+        "SELECT ID_mansione, descrizione FROM MANSIONE ORDER BY ID_mansione";
+
+
 }

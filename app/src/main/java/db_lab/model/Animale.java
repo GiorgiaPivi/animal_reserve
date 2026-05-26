@@ -180,6 +180,32 @@ public final class Animale {
             }
         }
 
+        // Statistiche
+        public static int contaTotali(Connection connection) {
+            try (var statement = DAOUtils.prepare(connection, Queries.CONTA_ANIMALI_TOTALI);
+                 var rs = statement.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("totale");
+                }
+                return 0;
+            } catch (SQLException e) {
+                throw new DAOException(e);
+            }
+        }
+
+        public static java.util.Map<String, Integer> contaPerStato(Connection connection) {
+            try (var statement = DAOUtils.prepare(connection, Queries.CONTA_ANIMALI_PER_STATO);
+                 var rs = statement.executeQuery()) {
+                var mappa = new java.util.HashMap<String, Integer>();
+                while (rs.next()) {
+                    mappa.put(rs.getString("stato_di_salute"), rs.getInt("totale"));
+                }
+                return mappa;
+            } catch (SQLException e) {
+                throw new DAOException(e);
+            }
+        }
+
         private static Animale fromResultSet(java.sql.ResultSet rs) throws SQLException {
             int idRecinto = rs.getInt("ID_recinto");
             Optional<Integer> recinto = rs.wasNull() ? Optional.empty() : Optional.of(idRecinto);

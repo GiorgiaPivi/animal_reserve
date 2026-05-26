@@ -54,6 +54,59 @@ public interface Model {
     int insertTerapia(String farmaco, String dosaggio, String durata,
                       LocalDate dataInizio, LocalDate dataFine, int idControllo);
 
+    List<Terapia> terapieByAnimale(int idAnimale);
+
+    List<Terapia> terapieByControllo(int idControllo);
+
+    // ------- Recinto -------
+
+    List<Recinto> recinti();
+
+    List<Recinto> recintiDisponibili();
+
+    Optional<Recinto> findRecinto(int idRecinto);
+
+    int contaAnimaliInRecinto(int idRecinto);
+
+    // ------- Movimentazione -------
+
+    int insertMovimentazione(LocalDate dataMovimentazione, int idAnimale, int idRecintoDestinazione);
+
+    List<Movimentazione> movimentazioniByAnimale(int idAnimale);
+
+    // ------- Trasporto Esterno -------
+
+    int insertTrasporto(LocalDate dataTrasporto, String destinazione, String motivazione,
+                        int idAnimale, int idVolontario);
+
+    List<TrasportoEsterno> trasportiByAnimale(int idAnimale);
+
+    List<TrasportoEsterno> allTrasporti();
+
+    // ------- Statistiche -------
+
+    int contaAnimaliTotali();
+
+    java.util.Map<String, Integer> contaAnimaliPerStato();
+
+    int contaControlliUltimi30Giorni();
+
+    java.util.Map<String, Object> statisticheGenerali();
+
+    java.util.Map<String, Object> statisticheSanitarie();
+
+    // ------- Admin Operations -------
+
+    void insertSpecie(String nome);
+
+    void insertRecinto(String tipologia);
+
+    void insertTurno(LocalDate data, String fascia);
+
+    void assegnaTurno(int idUtente, LocalDate data, String fascia);
+
+    void insertMansione(String descrizione);
+
     // ------- Factory -------
 
     static Model fromConnection(Connection connection) {

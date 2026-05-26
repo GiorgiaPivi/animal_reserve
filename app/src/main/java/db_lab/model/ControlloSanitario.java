@@ -106,5 +106,18 @@ public final class ControlloSanitario {
                 throw new DAOException(e);
             }
         }
+
+        // Statistiche - conta controlli ultimi 30 giorni
+        public static int contaUltimi30Giorni(Connection connection) {
+            try (var statement = DAOUtils.prepare(connection, Queries.CONTA_CONTROLLI_ULTIMI_30_GIORNI);
+                 var rs = statement.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("totale");
+                }
+                return 0;
+            } catch (SQLException e) {
+                throw new DAOException(e);
+            }
+        }
     }
 }
