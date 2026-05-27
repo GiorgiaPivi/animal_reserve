@@ -91,5 +91,22 @@ public final class Turno {
                 throw new DAOException(e);
             }
         }
+        public static List<Turno> listByUtente(Connection connection, int idUtente) {
+            try (var stmt = DAOUtils.prepare(connection, Queries.LIST_TURNI_BY_UTENTE, idUtente);
+                var rs = stmt.executeQuery()) {
+
+                var turni = new ArrayList<Turno>();
+                while (rs.next()) {
+                    turni.add(new Turno(
+                        rs.getDate("data").toLocalDate(),
+                        rs.getString("fascia_oraria")
+                    ));
+                }
+                return turni;
+
+            } catch (SQLException e) {
+                throw new DAOException(e);
+            }
+        }
     }
 }

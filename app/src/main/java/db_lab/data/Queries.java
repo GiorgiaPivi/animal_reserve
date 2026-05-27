@@ -284,6 +284,11 @@ public final class Queries {
     public static final String LIST_TURNI =
         "SELECT data, fascia_oraria FROM TURNO ORDER BY data, fascia_oraria";
     
+    public static final String LIST_TURNI_BY_UTENTE = 
+    "SELECT t.data, t.fascia_oraria FROM turno t " +
+    "JOIN svolgimento s ON t.data = s.data AND t.fascia_oraria = s.fascia_oraria " +
+    "WHERE s.id_utente = ?";
+    
     // ------- Mansioni -------
     public static final String INSERT_MANSIONE =
     "INSERT INTO MANSIONE (descrizione) VALUES (?)";
@@ -291,5 +296,8 @@ public final class Queries {
     public static final String LIST_MANSIONI =
         "SELECT ID_mansione, descrizione FROM MANSIONE ORDER BY ID_mansione";
 
-
+    public static final String LIST_MANSIONI_BY_UTENTE = 
+        "SELECT m.ID_mansione, m.descrizione FROM mansione m " +
+        "JOIN assegnazione_mansione am ON m.ID_mansione = am.ID_mansione " +
+        "WHERE am.ID_utente = ?";
 }

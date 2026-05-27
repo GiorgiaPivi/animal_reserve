@@ -9,8 +9,6 @@ import java.util.Map;
 import java.util.Optional;
 
 // Implementazione in-memory usata per testare l'applicazione senza database.
-// Comoda per verificare l'aspetto visivo e il flusso senza configurare MySQL.
-//
 public final class MockedModel implements Model {
 
     private final List<Utente> utenti;
@@ -21,6 +19,12 @@ public final class MockedModel implements Model {
     private final List<Recinto> recinti;
     private final List<Movimentazione> movimentazioni;
     private final List<TrasportoEsterno> trasporti;
+    private final List<Turno> turni;
+    private final List<Mansione> mansioni;
+    private final Map<Integer, Integer> turnoAssegnazioni;  
+    private final Map<Integer, Integer> mansioneAssegnazioni;
+
+
     private int nextId = 100;
 
     public MockedModel() {
@@ -28,7 +32,8 @@ public final class MockedModel implements Model {
         utenti.add(new Utente(1, "Mario", "Rossi", "veterinario@zoo.it", "pass", "veterinario"));
         utenti.add(new Utente(2, "Laura", "Bianchi", "volontario@zoo.it", "pass", "volontario"));
         utenti.add(new Utente(3, "Giulia", "Verdi", "visitatore@zoo.it", "pass", "visitatore"));
-
+        utenti.add(new Utente(4, "Admin", "Sistema", "admin@zoo.it", "pass", "admin"));
+        
         this.specie = new ArrayList<>();
         specie.add(new Specie(1, "Leone"));
         specie.add(new Specie(2, "Elefante"));
@@ -51,6 +56,24 @@ public final class MockedModel implements Model {
         this.terapie = new ArrayList<>();
         this.movimentazioni = new ArrayList<>();
         this.trasporti = new ArrayList<>();
+        this.turni = new ArrayList<>();
+        turni.add(new Turno(LocalDate.now(), "mattina"));
+        turni.add(new Turno(LocalDate.now().plusDays(1), "pomeriggio"));
+        
+        this.mansioni = new ArrayList<>();
+        mansioni.add(new Mansione(1, "Pulizia recinti"));
+        mansioni.add(new Mansione(2, "Alimentazione animali"));
+        mansioni.add(new Mansione(3, "Assistenza veterinaria"));
+        
+        this.turnoAssegnazioni = new HashMap<>();
+        this.mansioneAssegnazioni = new HashMap<>();
+        
+        // Assegna alcuni turni e mansioni di test
+        turnoAssegnazioni.put(0, 1); // Indice 0 assegnato a utente 1 (veterinario)
+        turnoAssegnazioni.put(1, 2); // Indice 1 assegnato a utente 2 (volontario)
+        
+        mansioneAssegnazioni.put(0, 1); // Indice 0 assegnato a utente 1
+        mansioneAssegnazioni.put(1, 2); // Indice 1 assegnato a utente 2
     }
 
     @Override
@@ -286,22 +309,22 @@ public final class MockedModel implements Model {
     @Override
     public Map<String, Object> statisticheGenerali() {
         Map<String, Object> stats = new HashMap<>();
-        stats.put("totale_animali", contaAnimaliTotali());
-        stats.put("animali_per_stato", contaAnimaliPerStato());
-        stats.put("totale_recinti", recinti.size());
-        stats.put("specie_presenti", specie.size());
+        stats.put("totale animali", contaAnimaliTotali());
+        stats.put("stato animale", contaAnimaliPerStato());
+        stats.put("totale recinti", recinti.size());
+        stats.put("specie presenti", specie.size());
         return stats;
     }
 
     @Override
     public Map<String, Object> statisticheSanitarie() {
         Map<String, Object> stats = new HashMap<>();
-        stats.put("controlli_ultimi_30_giorni", contaControlliUltimi30Giorni());
-        stats.put("totale_controlli", controlli.size());
-        stats.put("terapie_attive", terapie.stream()
+        stats.put("controlli ultimi 30 giorni", contaControlliUltimi30Giorni());
+        stats.put("totale controlli", controlli.size());
+        stats.put("terapie attive", terapie.stream()
             .filter(t -> t.dataFine.isAfter(LocalDate.now()))
             .count());
-        stats.put("animali_critici", animali.stream()
+        stats.put("animali critici", animali.stream()
             .filter(a -> a.statoDiSalute.equalsIgnoreCase("critico"))
             .count());
         return stats;
@@ -321,16 +344,46 @@ public final class MockedModel implements Model {
 
     @Override
     public void insertTurno(LocalDate data, String fascia) {
-        // Implementazione mock - non fa nulla
+        turni.add(new Turno(data, fascia));
     }
 
     @Override
     public void assegnaTurno(int idUtente, LocalDate data, String fascia) {
-        // Implementazione mock - non fa nulla
+        // Trova il turno e lo assegna all'utente
+        turni.stream()
+            .filter(t -> t.data.equals(data) && t.fascia.equals(fascia))
+            .findFirst()
+            .ifPresent(t -> {
+                System.out.println("Turno assegnato a utente " + idUtente);
+            });
     }
 
     @Override
     public void insertMansione(String descrizione) {
-        // Implementazione mock - non fa nulla
+        int id = ++nextId;
+        mansioni.add(new Mansione(id, descrizione));
+    }
+
+    @Override
+    public List<Turno> turni() {
+        return List.copyOf(turni);
+    }
+
+    @Override
+    public List<Mansione> mansioni() {
+        return List.copyOf(mansioni);
+    }
+    @Override
+    public List<Turno> turniByUtente(int idUtente) {
+        return turni.stream()
+            .filter(t -> turnoAssegnazioni.containsValue(idUtente))
+            .toList();
+    }
+
+    @Override
+    public List<Mansione> mansioniByUtente(int idUtente) {
+        return mansioni.stream()
+            .filter(m -> mansioneAssegnazioni.containsValue(idUtente))
+            .toList();
     }
 }

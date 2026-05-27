@@ -2,27 +2,13 @@ package db_lab;
 
 import db_lab.data.DAOException;
 import db_lab.model.Animale;
-import db_lab.model.ControlloSanitario;
 import db_lab.model.Model;
 import db_lab.model.Utente;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-// Il Controller descrive tutte le possibili interazioni dell'utente con l'applicazione.
-// Ogni metodo pubblico segue il pattern: soggetto + azione + oggetto.
-// Leggendo i metodi si capisce immediatamente tutto quello che può succedere nell'app.
-//
-//    ┌────── aggiorna ──────┐
-//    │                      │
-// ┌──▼─┐                 ┌──┴───────┐ aggiorna ┌───────┐
-// │view│                 │controller├──────────►model  │
-// └──┬─┘                 └──▲───────┘          └───────┘
-//    │      notifica         │
-//    └──── azioni utente ────┘
-//
 public final class Controller {
 
     private final Model model;
@@ -103,7 +89,18 @@ public final class Controller {
             this.view.registrazioneFailed("Email già registrata o errore database: " + e.getMessage());
         }
     }
+    public boolean isAdmin() {
+        return this.utenteCorrente.isPresent() && 
+            "admin".equalsIgnoreCase(this.utenteCorrente.get().ruolo);
+    }
 
+    public void userClickedAdminPanel() {
+        try {
+            this.view.adminPanelPage();
+        } catch (Exception e) {
+            this.view.genericError("Errore caricamento admin panel.");
+        }
+    }
     public void userClickedLogout() {
         this.utenteCorrente = Optional.empty();
         this.view.loginPage();
@@ -553,5 +550,48 @@ public final class Controller {
 
     public Optional<Utente> getUtenteCorrente() {
         return this.utenteCorrente;
+    }
+
+    public void userClickedTurni() {
+        try {
+            var turni = this.model.turniByUtente(this.utenteCorrente.get().id);
+            this.view.turniPage(turni);
+        } catch (DAOException e) {
+            this.view.genericError("Errore nel caricamento turni.");
+        }
+    }
+
+    public void userClickedMansioni() {
+        try {
+            var mansioni = this.model.mansioniByUtente(this.utenteCorrente.get().id);
+            this.view.mansioniPage(mansioni);
+        } catch (DAOException e) {
+            this.view.genericError("Errore nel caricamento mansioni.");
+        }
+    }
+
+    public void adminClickedAllTurni() {
+        try {
+            var turni = this.model.turni();
+            this.view.turniPage(turni);
+        } catch (DAOException e) {
+            this.view.genericError("Errore nel caricamento turni.");
+        }
+    }
+
+    public void adminClickedAllMansioni() {
+        try {
+            var mansioni = this.model.mansioni();
+            this.view.mansioniPage(mansioni);
+        } catch (DAOException e) {
+            this.view.genericError("Errore nel caricamento mansioni.");
+        }
+    }
+    public void userRequestedNuovoTurno() {
+        this.view.nuovoTurnoForm();
+    }
+
+    public void userRequestedNuovaMansione() {
+        this.view.nuovaMansioneForm();
     }
 }

@@ -76,6 +76,23 @@ public final class Mansione {
                 throw new DAOException(e);
             }
         }
+        public static List<Mansione> listByUtente(Connection connection, int idUtente) {
+            try (var stmt = DAOUtils.prepare(connection, Queries.LIST_MANSIONI_BY_UTENTE, idUtente);
+                var rs = stmt.executeQuery()) {
+
+                var mansioni = new ArrayList<Mansione>();
+                while (rs.next()) {
+                    mansioni.add(new Mansione(
+                        rs.getInt("ID_mansione"),
+                        rs.getString("descrizione")
+                    ));
+                }
+                return mansioni;
+
+            } catch (SQLException e) {
+                throw new DAOException(e);
+            }
+        }
     }
 }
 

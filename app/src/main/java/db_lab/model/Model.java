@@ -116,4 +116,13 @@ public interface Model {
     static Model mock() {
         return new MockedModel();
     }
+
+    // ------ Turni -------
+    List<Turno> turni();
+    List<Turno> turniByUtente(int idUtente);
+
+    // ----- Mansioni -----
+    List<Mansione> mansioni();
+    List<Mansione> mansioniByUtente(int idUtente);
+
 }

@@ -245,6 +245,23 @@ public final class DBModel implements Model {
         Mansione.DAO.insert(connection, descrizione);
     }
 
+    @Override
+    public List<Turno> turni() {
+        return Turno.DAO.list(connection);
+    }
 
+    @Override
+    public List<Mansione> mansioni() {
+        return Mansione.DAO.list(connection);
+    }
 
+    @Override
+    public List<Turno> turniByUtente(int idUtente) {
+        return Turno.DAO.listByUtente(connection,idUtente);
+    }
+
+    @Override
+    public List<Mansione> mansioniByUtente(int idUtente) {
+        return Mansione.DAO.listByUtente(connection,idUtente);
+    }
 }
