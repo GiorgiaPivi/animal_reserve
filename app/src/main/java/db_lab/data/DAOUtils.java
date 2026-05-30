@@ -14,7 +14,7 @@ public final class DAOUtils {
             var host = "localhost";
             var port = "3306";
             var connectionString = "jdbc:mysql://" + host + ":" + port + "/" + database
-                + "?useSSL=false&serverTimezone=UTC";
+            + "?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true";
             return DriverManager.getConnection(connectionString, username, password);
         } catch (Exception e) {
             throw new DAOException(e);

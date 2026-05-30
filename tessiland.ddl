@@ -3,8 +3,8 @@
 -- =====================================================
 
 -- Crea il database se non esiste
-CREATE DATABASE IF NOT EXISTS zoo_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE zoo_db;
+CREATE DATABASE IF NOT EXISTS animal_reserve CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE animal_reserve;
 
 -- Elimina tabelle esistenti (in ordine per rispettare i vincoli)
 DROP TABLE IF EXISTS Previsione;
@@ -31,7 +31,7 @@ CREATE TABLE Utente (
     cognome VARCHAR(50) NOT NULL,
     email VARCHAR(100) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
-    ruolo VARCHAR(20) NOT NULL CHECK(ruolo IN('visitatore','volontario','veterinario'))
+    ruolo VARCHAR(20) NOT NULL CHECK(ruolo IN('visitatore','volontario', 'veterinario','admin'))
 );
 
 -- =====================================================
@@ -241,7 +241,7 @@ INSERT INTO Utente (nome, cognome, email, password, ruolo)
 VALUES ('Giulia', 'Verdi', 'visitatore@zoo.it', 'pass', 'visitatore');
 
 INSERT INTO Utente (nome, cognome, email, password, ruolo) 
-VALUES ('Admin', 'Sistema', 'admin@zoo.it', 'pass', 'veterinario');
+VALUES ('Admin', 'Sistema', 'admin@zoo.it', 'pass', 'admin');
 
 -- Inserisci Specie
 INSERT INTO Specie (nome_specie) VALUES ('Leone');

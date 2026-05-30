@@ -7,10 +7,10 @@ public final class App {
 
     public static void main(String[] args) throws Exception {
 
-        // var connection = DAOUtils.localMySQLConnection("animal_reserve", "root", "");
-        // var model = Model.fromConnection(connection);
+        var connection = DAOUtils.localMySQLConnection("animal_reserve", "root", "LilPeep2017_");
+        var model = Model.fromConnection(connection);
 
-        var model = Model.mock(); 
+        // var model = Model.mock(); 
 
         View view = new View();
         view.loginPage();
