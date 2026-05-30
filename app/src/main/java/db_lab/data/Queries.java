@@ -109,7 +109,8 @@ public final class Queries {
     public static final String INSERT_CONTROLLO =
         """
         INSERT INTO Controllo_Sanitario (data, ora, tipologia, esito, ID_animale, ID_veterinario)
-        VALUES (?, ?, ?, ?, ?, ?)
+        SELECT ?, ?, ?, ?, ?, ?
+        WHERE (SELECT ruolo FROM Utente WHERE ID_utente = ?) = 'veterinario'
         """;
 
     public static final String LIST_CONTROLLI_BY_ANIMALE =
@@ -279,7 +280,11 @@ public final class Queries {
     "INSERT INTO TURNO (data, fascia_oraria) VALUES (?, ?)";
 
     public static final String ASSIGN_TURNO =
-        "INSERT INTO SVOLGIMENTO (ID_utente, data, fascia_oraria) VALUES (?, ?, ?)";
+        """
+        INSERT INTO Svolgimento (ID_utente, data, fascia_oraria)
+        SELECT ?, ?, ?
+        WHERE (SELECT ruolo FROM Utente WHERE ID_utente = ?) IN ('volontario', 'veterinario')
+        """;
 
     public static final String LIST_TURNI =
         "SELECT data, fascia_oraria FROM TURNO ORDER BY data, fascia_oraria";
@@ -292,6 +297,13 @@ public final class Queries {
     // ------- Mansioni -------
     public static final String INSERT_MANSIONE =
     "INSERT INTO MANSIONE (descrizione) VALUES (?)";
+
+    public static final String INSERT_AFFIDATO =
+        """
+        INSERT INTO Affidato (ID_utente, ID_mansione)
+        SELECT ?, ?
+        WHERE (SELECT ruolo FROM Utente WHERE ID_utente = ?) = 'volontario'
+        """;
 
     public static final String LIST_MANSIONI =
         "SELECT ID_mansione, descrizione FROM MANSIONE ORDER BY ID_mansione";

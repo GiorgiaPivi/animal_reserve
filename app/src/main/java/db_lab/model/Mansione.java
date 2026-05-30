@@ -58,6 +58,22 @@ public final class Mansione {
             }
         }
 
+        /** Assegna una mansione a un volontario (relazione AFFIDATO).
+         *  La query verifica che l'utente sia un volontario prima di inserire. */
+        public static void affida(Connection connection, int idUtente, int idMansione) {
+            try (var stmt = connection.prepareStatement(Queries.INSERT_AFFIDATO)) {
+                stmt.setInt(1, idUtente);
+                stmt.setInt(2, idMansione);
+                stmt.setInt(3, idUtente); // usato nel WHERE per il controllo ruolo
+                int rows = stmt.executeUpdate();
+                if (rows == 0) {
+                    throw new DAOException("Operazione non consentita: l'utente non è un volontario.");
+                }
+            } catch (SQLException e) {
+                throw new DAOException(e);
+            }
+        }
+
         /** Lista tutte le mansioni presenti nel sistema */
         public static List<Mansione> list(Connection connection) {
             try (var stmt = DAOUtils.prepare(connection, Queries.LIST_MANSIONI);
@@ -95,4 +111,3 @@ public final class Mansione {
         }
     }
 }
-

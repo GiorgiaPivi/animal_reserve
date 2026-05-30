@@ -61,13 +61,18 @@ public final class Turno {
             }
         }
 
-        /** Assegna un turno a un utente (relazione SVOLGIMENTO) */
+        /** Assegna un turno a un utente (relazione SVOLGIMENTO).
+         *  La query verifica che l'utente sia volontario o veterinario prima di inserire. */
         public static void assegna(Connection connection, int idUtente, LocalDate data, String fascia) {
             try (var stmt = connection.prepareStatement(Queries.ASSIGN_TURNO)) {
                 stmt.setInt(1, idUtente);
                 stmt.setDate(2, Date.valueOf(data));
                 stmt.setString(3, fascia);
-                stmt.executeUpdate();
+                stmt.setInt(4, idUtente); // usato nel WHERE per il controllo ruolo
+                int rows = stmt.executeUpdate();
+                if (rows == 0) {
+                    throw new DAOException("Operazione non consentita: l'utente non è personale del centro.");
+                }
             } catch (SQLException e) {
                 throw new DAOException(e);
             }

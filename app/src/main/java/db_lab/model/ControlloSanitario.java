@@ -64,7 +64,8 @@ public final class ControlloSanitario {
 
     public static final class DAO {
 
-        // OP09 - Inserisce un nuovo controllo, restituisce l'ID generato
+        // OP09 - Inserisce un nuovo controllo, restituisce l'ID generato.
+        // La query verifica che ID_veterinario abbia ruolo = 'veterinario' prima di inserire.
         public static int insert(Connection connection, LocalDate data, LocalTime ora,
                 String tipologia, String esito, int idAnimale, int idVeterinario) {
             try (var statement = connection.prepareStatement(
@@ -75,7 +76,11 @@ public final class ControlloSanitario {
                 statement.setString(4, esito);
                 statement.setInt(5, idAnimale);
                 statement.setInt(6, idVeterinario);
-                statement.executeUpdate();
+                statement.setInt(7, idVeterinario); // usato nel WHERE per il controllo ruolo
+                int rows = statement.executeUpdate();
+                if (rows == 0) {
+                    throw new DAOException("Operazione non consentita: l'utente non è un veterinario.");
+                }
                 try (var keys = statement.getGeneratedKeys()) {
                     if (keys.next()) return keys.getInt(1);
                 }

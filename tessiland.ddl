@@ -225,3 +225,140 @@ CREATE INDEX idx_utente_ruolo ON Utente(ruolo);
 -- =====================================================
 -- FINE SCHEMA
 -- =====================================================
+
+-- =====================================================
+-- INSERISCI DATI DI TEST
+-- =====================================================
+
+-- Inserisci Utenti
+INSERT INTO Utente (nome, cognome, email, password, ruolo) 
+VALUES ('Mario', 'Rossi', 'veterinario@zoo.it', 'pass', 'veterinario');
+
+INSERT INTO Utente (nome, cognome, email, password, ruolo) 
+VALUES ('Laura', 'Bianchi', 'volontario@zoo.it', 'pass', 'volontario');
+
+INSERT INTO Utente (nome, cognome, email, password, ruolo) 
+VALUES ('Giulia', 'Verdi', 'visitatore@zoo.it', 'pass', 'visitatore');
+
+INSERT INTO Utente (nome, cognome, email, password, ruolo) 
+VALUES ('Admin', 'Sistema', 'admin@zoo.it', 'pass', 'veterinario');
+
+-- Inserisci Specie
+INSERT INTO Specie (nome_specie) VALUES ('Leone');
+INSERT INTO Specie (nome_specie) VALUES ('Elefante');
+INSERT INTO Specie (nome_specie) VALUES ('Pinguino');
+INSERT INTO Specie (nome_specie) VALUES ('Orso');
+INSERT INTO Specie (nome_specie) VALUES ('Tigre');
+
+-- Inserisci Recinti
+INSERT INTO Recinto (tipologia) VALUES ('Savana');
+INSERT INTO Recinto (tipologia) VALUES ('Foresta');
+INSERT INTO Recinto (tipologia) VALUES ('Acquatico');
+INSERT INTO Recinto (tipologia) VALUES ('Montagna');
+
+-- Inserisci Animali
+INSERT INTO Animale (nome_animale, eta, provenienza, stato_di_salute, descrizione, data_arrivo, ID_specie, ID_recinto) 
+VALUES ('Simba', 5, 'Kenya', 'buono', 'Leone africano maschio', '2021-03-10', 1, 1);
+
+INSERT INTO Animale (nome_animale, eta, provenienza, stato_di_salute, descrizione, data_arrivo, ID_specie, ID_recinto) 
+VALUES ('Dumbo', 12, 'India', 'discreto', 'Elefante asiatico femmina', '2019-07-22', 2, 2);
+
+INSERT INTO Animale (nome_animale, eta, provenienza, stato_di_salute, descrizione, data_arrivo, ID_specie, ID_recinto) 
+VALUES ('Pingo', 3, 'Antartide', 'critico', 'Pinguino imperatore giovane', '2023-01-05', 3, 3);
+
+INSERT INTO Animale (nome_animale, eta, provenienza, stato_di_salute, descrizione, data_arrivo, ID_specie, ID_recinto) 
+VALUES ('Bruno', 8, 'Russia', 'buono', 'Orso bruno maschio', '2020-05-15', 4, 4);
+
+INSERT INTO Animale (nome_animale, eta, provenienza, stato_di_salute, descrizione, data_arrivo, ID_specie, ID_recinto) 
+VALUES ('Raja', 6, 'India', 'discreto', 'Tigre del Bengala maschio', '2022-09-20', 5, 1);
+
+-- Inserisci Turni
+INSERT INTO Turno (data, fascia_oraria) VALUES (CURDATE(), 'mattina');
+INSERT INTO Turno (data, fascia_oraria) VALUES (CURDATE(), 'pomeriggio');
+INSERT INTO Turno (data, fascia_oraria) VALUES (DATE_ADD(CURDATE(), INTERVAL 1 DAY), 'mattina');
+INSERT INTO Turno (data, fascia_oraria) VALUES (DATE_ADD(CURDATE(), INTERVAL 1 DAY), 'pomeriggio');
+INSERT INTO Turno (data, fascia_oraria) VALUES (DATE_ADD(CURDATE(), INTERVAL 2 DAY), 'mattina');
+
+-- Inserisci Mansioni
+INSERT INTO Mansione (descrizione) VALUES ('pulizia recinto');
+INSERT INTO Mansione (descrizione) VALUES ('distribuzione cibo e acqua');
+INSERT INTO Mansione (descrizione) VALUES ('somministrazione medicinali');
+INSERT INTO Mansione (descrizione) VALUES ('manutenzione recinto');
+INSERT INTO Mansione (descrizione) VALUES ('altro');
+
+-- Assegna Turni ai Volontari (SVOLGIMENTO)
+INSERT INTO Svolgimento (ID_utente, data, fascia_oraria) 
+VALUES (1, CURDATE(), 'mattina');
+
+INSERT INTO Svolgimento (ID_utente, data, fascia_oraria) 
+VALUES (2, CURDATE(), 'pomeriggio');
+
+INSERT INTO Svolgimento (ID_utente, data, fascia_oraria) 
+VALUES (1, DATE_ADD(CURDATE(), INTERVAL 1 DAY), 'mattina');
+
+INSERT INTO Svolgimento (ID_utente, data, fascia_oraria) 
+VALUES (2, DATE_ADD(CURDATE(), INTERVAL 1 DAY), 'pomeriggio');
+
+-- Assegna Mansioni ai Volontari (AFFIDATO)
+INSERT INTO Affidato (ID_utente, ID_mansione) VALUES (1, 1);
+INSERT INTO Affidato (ID_utente, ID_mansione) VALUES (1, 2);
+INSERT INTO Affidato (ID_utente, ID_mansione) VALUES (2, 2);
+INSERT INTO Affidato (ID_utente, ID_mansione) VALUES (2, 3);
+INSERT INTO Affidato (ID_utente, ID_mansione) VALUES (4, 1);
+
+-- Assegna Mansioni ai Recinti (ASSEGNATO)
+INSERT INTO Assegnato (ID_mansione, ID_recinto) VALUES (1, 1);
+INSERT INTO Assegnato (ID_mansione, ID_recinto) VALUES (1, 2);
+INSERT INTO Assegnato (ID_mansione, ID_recinto) VALUES (2, 1);
+INSERT INTO Assegnato (ID_mansione, ID_recinto) VALUES (2, 2);
+INSERT INTO Assegnato (ID_mansione, ID_recinto) VALUES (2, 3);
+INSERT INTO Assegnato (ID_mansione, ID_recinto) VALUES (3, 3);
+
+-- Inserisci Controlli Sanitari
+INSERT INTO Controllo_Sanitario (data, ora, tipologia, esito, ID_animale, ID_veterinario) 
+VALUES (CURDATE(), CURTIME(), 'visita di routine', 'positivo', 1, 1);
+
+INSERT INTO Controllo_Sanitario (data, ora, tipologia, esito, ID_animale, ID_veterinario) 
+VALUES (DATE_SUB(CURDATE(), INTERVAL 2 DAY), '10:30:00', 'esami delle feci', 'negativo', 2, 1);
+
+INSERT INTO Controllo_Sanitario (data, ora, tipologia, esito, ID_animale, ID_veterinario) 
+VALUES (DATE_SUB(CURDATE(), INTERVAL 1 DAY), '14:00:00', 'valutazione respiratoria', 'da monitorare', 3, 1);
+
+INSERT INTO Controllo_Sanitario (data, ora, tipologia, esito, ID_animale, ID_veterinario) 
+VALUES (DATE_SUB(CURDATE(), INTERVAL 5 DAY), '09:15:00', 'visita di routine', 'positivo', 4, 1);
+
+INSERT INTO Controllo_Sanitario (data, ora, tipologia, esito, ID_animale, ID_veterinario) 
+VALUES (DATE_SUB(CURDATE(), INTERVAL 3 DAY), '11:45:00', 'monitoraggio terapia', 'positivo', 5, 1);
+
+-- Inserisci Terapie
+INSERT INTO Terapia (farmaco, dosaggio, durata, data_inizio, data_fine, ID_controllo) 
+VALUES ('Antibiotico A', '500mg', '7 giorni', CURDATE(), DATE_ADD(CURDATE(), INTERVAL 7 DAY), 1);
+
+INSERT INTO Terapia (farmaco, dosaggio, durata, data_inizio, data_fine, ID_controllo) 
+VALUES ('Vitamine', '100ml', '14 giorni', DATE_SUB(CURDATE(), INTERVAL 2 DAY), DATE_ADD(CURDATE(), INTERVAL 12 DAY), 2);
+
+INSERT INTO Terapia (farmaco, dosaggio, durata, data_inizio, data_fine, ID_controllo) 
+VALUES ('Antinfiammatorio', '250mg', '5 giorni', DATE_SUB(CURDATE(), INTERVAL 1 DAY), DATE_ADD(CURDATE(), INTERVAL 4 DAY), 3);
+
+-- Inserisci Movimentazioni
+INSERT INTO Movimentazione_Animale (data_spostamento, motivazione, ID_animale, ID_recinto_destinazione, ID_recinto_provenienza) 
+VALUES (DATE_SUB(CURDATE(), INTERVAL 10 DAY), 'Trasferimento per ampliamento recinto', 1, 2, 1);
+
+INSERT INTO Movimentazione_Animale (data_spostamento, motivazione, ID_animale, ID_recinto_destinazione, ID_recinto_provenienza) 
+VALUES (DATE_SUB(CURDATE(), INTERVAL 5 DAY), 'Migliore spazio per recupero', 3, 4, 3);
+
+-- Inserisci Trasporti Esterni
+INSERT INTO Trasporto_Esterno (destinazione, data, motivazione, mezzo_di_trasporto, ID_animale) 
+VALUES ('Clinica Veterinaria Centro', DATE_SUB(CURDATE(), INTERVAL 8 DAY), 'Controllo approfondito', 'ambulanza veterinaria', 2);
+
+INSERT INTO Trasporto_Esterno (destinazione, data, motivazione, mezzo_di_trasporto, ID_animale) 
+VALUES ('Ospedale Animali Specializzato', DATE_SUB(CURDATE(), INTERVAL 15 DAY), 'Intervento chirurgico', 'ambulanza veterinaria', 4);
+
+-- Inserisci Previsioni (Trasporto-Mansione)
+INSERT INTO Previsione (ID_trasporto, ID_mansione) VALUES (1, 3);
+INSERT INTO Previsione (ID_trasporto, ID_mansione) VALUES (1, 2);
+INSERT INTO Previsione (ID_trasporto, ID_mansione) VALUES (2, 3);
+
+-- =====================================================
+-- FINE DATI
+-- =====================================================
