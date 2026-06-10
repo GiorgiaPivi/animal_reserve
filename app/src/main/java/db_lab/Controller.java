@@ -56,7 +56,6 @@ public final class Controller {
     }
 
     public void userSubmittedRegistrazione(String nome, String cognome, String email, String password) {
-        // Validazione input
         if (nome == null || nome.trim().isEmpty()) {
             this.view.registrazioneFailed("Il nome è obbligatorio.");
             return;
@@ -257,7 +256,6 @@ public final class Controller {
     }
 
     public void userSubmittedTerapia(String farmaco, String dosaggio, int giorni, int idControllo) {
-        // Validazione input
         if (farmaco == null || farmaco.trim().isEmpty()) {
             this.view.genericError("Il nome del farmaco è obbligatorio.");
             return;
@@ -376,15 +374,6 @@ public final class Controller {
             this.view.genericMessage("Turno assegnato.");
         } catch (DAOException e) {
             this.view.genericError("Errore assegnazione turno.");
-        }
-    }
-
-    public void adminCreatedMansione(String descrizione) {
-        try {
-            this.model.insertMansione(descrizione);
-            this.view.genericMessage("Mansione creata.");
-        } catch (DAOException e) {
-            this.view.genericError("Errore creazione mansione.");
         }
     }
 
@@ -564,7 +553,7 @@ public final class Controller {
     public void userClickedMansioni() {
         try {
             var mansioni = this.model.mansioniByUtente(this.utenteCorrente.get().id);
-            this.view.mansioniPage(mansioni);
+            this.view.mansioniPage(mansioni, this.utenteCorrente);
         } catch (DAOException e) {
             this.view.genericError("Errore nel caricamento mansioni.");
         }
@@ -582,7 +571,7 @@ public final class Controller {
     public void adminClickedAllMansioni() {
         try {
             var mansioni = this.model.mansioni();
-            this.view.mansioniPage(mansioni);
+            this.view.mansioniPage(mansioni, this.utenteCorrente);
         } catch (DAOException e) {
             this.view.genericError("Errore nel caricamento mansioni.");
         }
@@ -594,4 +583,63 @@ public final class Controller {
     public void userRequestedNuovaMansione() {
         this.view.nuovaMansioneForm();
     }
+
+    public void userRequestedNuovaSpecie() {
+        this.view.nuovaSpecieForm();
+    }
+
+    public void adminCreatedMansione(String descrizione, String tipoMansione) {
+        try {
+            this.model.insertMansione(descrizione, tipoMansione);
+            this.view.genericMessage("Mansione creata.");
+        } catch (DAOException e) {
+            this.view.genericError("Errore creazione mansione.");
+        }
+    }
+    public void userRequestedNuovoPersonale() {
+        this.view.nuovoPersonaleForm();
+    }
+    public void userClickedPersonale() {
+        try {
+            this.view.genericMessage("Funzionalità di visualizzazione personale non ancora implementata.");
+        } catch (DAOException e) {
+            this.view.genericError("Errore nel caricamento del personale.");
+        }
+    }
+
+    public void adminCreatedPersonale(String nome, String cognome, String email, String password, String ruolo) {
+        if (nome == null || nome.trim().isEmpty()) {
+            this.view.genericError("Il nome è obbligatorio.");
+            return;
+        }
+        if (cognome == null || cognome.trim().isEmpty()) {
+            this.view.genericError("Il cognome è obbligatorio.");
+            return;
+        }
+        if (email == null || email.trim().isEmpty()) {
+            this.view.genericError("L'email è obbligatoria.");
+            return;
+        }
+        if (!email.contains("@") || !email.contains(".")) {
+            this.view.genericError("Formato email non valido.");
+            return;
+        }
+        if (password == null || password.length() < 4) {
+            this.view.genericError("La password deve essere di almeno 4 caratteri.");
+            return;
+        }
+        if (ruolo == null || ruolo.trim().isEmpty()) {
+            this.view.genericError("Il ruolo è obbligatorio.");
+            return;
+        }
+        
+        try {
+            this.model.registra(nome, cognome, email, password);
+            this.view.genericMessage("Personale creato con successo.");
+            this.loadAnimaliPage();
+        } catch (DAOException e) {
+            this.view.genericError("Errore nella creazione del personale: " + e.getMessage());
+        }
+    }
+
 }

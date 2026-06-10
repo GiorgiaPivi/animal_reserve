@@ -105,7 +105,9 @@ public interface Model {
 
     void assegnaTurno(int idUtente, LocalDate data, String fascia);
 
-    void insertMansione(String descrizione);
+    void insertMansione(String descrizione, String tipoMansione);
+
+    void affidaMansione(int idUtente, int idMansione);
 
     // ------- Factory -------
 

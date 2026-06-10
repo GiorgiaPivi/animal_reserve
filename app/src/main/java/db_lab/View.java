@@ -249,8 +249,56 @@ public final class View extends JFrame {
         showGenericListPage("Turni", turni);
     }
 
-    public void mansioniPage(List<?> mansioni) {
-        showGenericListPage("Mansioni", mansioni);
+    public void mansioniPage(List<?> mansioni, Optional<Utente> utente) {
+        JPanel outerPanel = new JPanel(new BorderLayout());
+        outerPanel.setBackground(BACKGROUND_COLOR);
+        JPanel panel = createCenteredPanel();
+        
+        JLabel titleLabel = createTitleLabel("Mansioni");
+        panel.add(titleLabel);
+        panel.add(Box.createVerticalStrut(20));
+        
+        List<?> mansioniFiltratre = mansioni;
+        if (utente.isPresent() && !utente.get().ruolo.equalsIgnoreCase("admin")) {
+            String tipoRuolo = utente.get().ruolo.equalsIgnoreCase("veterinario") ? "veterinario" : "volontario";
+            mansioniFiltratre = mansioni.stream()
+                .filter(m -> {
+                    if (m instanceof Mansione) {
+                        return ((Mansione) m).tipoMansione.equals(tipoRuolo);
+                    }
+                    return true;
+                })
+                .toList();
+        }
+        
+        JPanel mansioniBox = new JPanel();
+        mansioniBox.setLayout(new BoxLayout(mansioniBox, BoxLayout.Y_AXIS));
+        mansioniBox.setBackground(Color.WHITE);
+        mansioniBox.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(BORDER_COLOR, 1),
+            new EmptyBorder(15, 15, 15, 15)
+        ));
+        
+        // USA mansioniFiltratre INVECE DI mansioni:
+        for (Object mansione : mansioniFiltratre) {
+            JLabel mansioneLabe = new JLabel(mansione.toString());
+            mansioneLabe.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+            mansioneLabe.setForeground(TEXT_COLOR);
+            mansioniBox.add(mansioneLabe);
+            mansioniBox.add(Box.createVerticalStrut(8));
+        }
+        
+        panel.add(mansioniBox);
+        panel.add(Box.createVerticalStrut(20));
+        panel.add(createButton("← Indietro", () -> getController().userClickedBack()));
+        panel.add(Box.createVerticalGlue());
+        
+        JScrollPane scrollPane = new JScrollPane(panel);
+        scrollPane.setBackground(BACKGROUND_COLOR);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        outerPanel.add(scrollPane, BorderLayout.CENTER);
+        
+        showPage("mansioni", outerPanel);
     }
     
     // ============ LISTA ANIMALI ============
@@ -335,6 +383,10 @@ public final class View extends JFrame {
         actionsPanel.add(createButton("Recinti", () -> getController().userClickedRecinti()));
         actionsPanel.add(createButton("Trasporti", () -> getController().userClickedTuttiTrasporti()));
         actionsPanel.add(createButton("Statistiche", () -> getController().userClickedStatisticheGenerali()));
+        if (utente.isVeterinario()) {
+            actionsPanel.add(createButton(" Animali da Controllare", () -> getController().userClickedAnimaliDaControllare()));
+            actionsPanel.add(Box.createVerticalStrut(10));
+        }
 
         if (utente.isVeterinario() || utente.isVolontario()) {
             actionsPanel.add(createButton("Turni", () -> getController().userClickedTurni()));
@@ -355,20 +407,24 @@ public final class View extends JFrame {
         panel.add(title);
         panel.add(Box.createVerticalStrut(30));
         
-        panel.add(createButton("Crea Nuovo Turno", () -> getController().userRequestedNuovoTurno()));
+        panel.add(createButton("Assegna Turno", () -> getController().userRequestedNuovoTurno()));
         panel.add(Box.createVerticalStrut(10));
         panel.add(createButton("Visualizza Turni", () -> getController().adminClickedAllTurni()));
         panel.add(Box.createVerticalStrut(20));
         
-        panel.add(createButton("Crea Nuova Mansione", () -> getController().userRequestedNuovaMansione()));
+        panel.add(createButton("Crea e Assegna Mansione", () -> getController().userRequestedNuovaMansione()));
         panel.add(Box.createVerticalStrut(10));
         panel.add(createButton("Visualizza Mansioni", () -> getController().adminClickedAllMansioni()));
         panel.add(Box.createVerticalStrut(20));
         
-        panel.add(createButton("Gestisci Specie", () -> getController().userClickedSpecie()));
+        panel.add(createButton("+ Crea Specie", () -> getController().userRequestedNuovaSpecie()));
         panel.add(Box.createVerticalStrut(10));
-        panel.add(createButton("Gestisci Recinti", () -> getController().userClickedRecinti()));
+        panel.add(createButton("Gestisci Specie", () -> getController().userClickedSpecie()));
         panel.add(Box.createVerticalStrut(20));
+
+        panel.add(createButton("+ Crea Personale", () -> getController().userRequestedNuovoPersonale()));
+        panel.add(Box.createVerticalStrut(10));
+        
         panel.add(createButton("← Indietro", () -> getController().userClickedBack()));
         panel.add(Box.createVerticalGlue());
         
@@ -380,23 +436,27 @@ public final class View extends JFrame {
         outerPanel.setBackground(BACKGROUND_COLOR);
         JPanel panel = createCenteredPanel();
         
-        JLabel titleLabel = createTitleLabel("Crea Nuovo Turno");
+        JLabel titleLabel = createTitleLabel("Assegna Turno");
         panel.add(titleLabel);
         panel.add(Box.createVerticalStrut(30));
         
         JSpinner dataSpinner = new JSpinner(new SpinnerDateModel());
-        JComboBox<String> fasciaCombo = new JComboBox<>(new String[]{"mattina", "pomeriggio", "notte"});
+        dataSpinner.setEditor(new JSpinner.DateEditor(dataSpinner, "dd/MM/yyyy"));
+        JComboBox<String> fasciaCombo = new JComboBox<>(new String[]{"mattina", "pomeriggio"});
+        JSpinner idUtenteSpinner = new JSpinner(new javax.swing.SpinnerNumberModel(1, 1, 1000, 1));
         
         addLabeledField(panel, "Data:", dataSpinner);
         addLabeledField(panel, "Fascia:", fasciaCombo);
+        addLabeledField(panel, "ID Utente:", idUtenteSpinner);
         panel.add(Box.createVerticalStrut(20));
         
-        panel.add(createButton("✓ Crea Turno", () -> {
+        panel.add(createButton("✓ Assegna Turno", () -> {
             try {
                 java.util.Date utilDate = (java.util.Date) dataSpinner.getValue();
                 LocalDate data = new java.sql.Date(utilDate.getTime()).toLocalDate();
                 String fascia = (String) fasciaCombo.getSelectedItem();
-                getController().adminCreatedTurno(data, fascia);
+                int idUtente = (int) idUtenteSpinner.getValue();
+                getController().adminAssignedTurno(idUtente, data, fascia);
             } catch (Exception ex) {
                 genericError("Errore nei dati inseriti.");
             }
@@ -412,28 +472,35 @@ public final class View extends JFrame {
         outerPanel.add(scrollPane, BorderLayout.CENTER);
         
         showPage("nuovoTurno", outerPanel);
-}
+    }
 
     public void nuovaMansioneForm() {
         JPanel outerPanel = new JPanel(new BorderLayout());
         outerPanel.setBackground(BACKGROUND_COLOR);
         JPanel panel = createCenteredPanel();
         
-        JLabel titleLabel = createTitleLabel("Crea Nuova Mansione");
+        JLabel titleLabel = createTitleLabel("Crea e Assegna Mansione");
         panel.add(titleLabel);
         panel.add(Box.createVerticalStrut(30));
         
         JTextField descrizione = new JTextField(30);
+        JComboBox<String> tipoCombo = new JComboBox<>(new String[]{"volontario", "veterinario"});
+        JSpinner idVolontarioSpinner = new JSpinner(new javax.swing.SpinnerNumberModel(1, 1, 1000, 1));
+        
         addLabeledField(panel, "Descrizione:", descrizione);
+        addLabeledField(panel, "Tipo:", tipoCombo);
+        addLabeledField(panel, "ID Volontario:", idVolontarioSpinner);
         panel.add(Box.createVerticalStrut(20));
         
-        panel.add(createButton("✓ Crea Mansione", () -> {
+        panel.add(createButton("Crea e Assegna", () -> {
             try {
                 if (descrizione.getText().isEmpty()) {
                     genericError("La descrizione è obbligatoria.");
                     return;
                 }
-                getController().adminCreatedMansione(descrizione.getText());
+                String tipo = (String) tipoCombo.getSelectedItem();
+                int idVolontario = (int) idVolontarioSpinner.getValue();
+                getController().adminCreatedMansione(descrizione.getText(), tipo);
             } catch (Exception ex) {
                 genericError("Errore nei dati inseriti.");
             }
@@ -449,6 +516,90 @@ public final class View extends JFrame {
         outerPanel.add(scrollPane, BorderLayout.CENTER);
         
         showPage("nuovaMansione", outerPanel);
+    }
+    public void nuovaSpecieForm() {
+        JPanel outerPanel = new JPanel(new BorderLayout());
+        outerPanel.setBackground(BACKGROUND_COLOR);
+        JPanel panel = createCenteredPanel();
+        
+        JLabel titleLabel = createTitleLabel("Crea Nuova Specie");
+        panel.add(titleLabel);
+        panel.add(Box.createVerticalStrut(30));
+        
+        JTextField nome = new JTextField(30);
+        addLabeledField(panel, "Nome Specie:", nome);
+        panel.add(Box.createVerticalStrut(20));
+        
+        panel.add(createButton("✓ Crea Specie", () -> {
+            try {
+                if (nome.getText().isEmpty()) {
+                    genericError("Il nome della specie è obbligatorio.");
+                    return;
+                }
+                getController().adminCreatedSpecie(nome.getText());
+            } catch (Exception ex) {
+                genericError("Errore nei dati inseriti.");
+            }
+        }));
+        
+        panel.add(Box.createVerticalStrut(10));
+        panel.add(createButton("← Annulla", () -> getController().userClickedBack()));
+        panel.add(Box.createVerticalGlue());
+        
+        JScrollPane scrollPane = new JScrollPane(panel);
+        scrollPane.setBackground(BACKGROUND_COLOR);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        outerPanel.add(scrollPane, BorderLayout.CENTER);
+        
+        showPage("nuovaSpecie", outerPanel);
+    }
+    public void nuovoPersonaleForm() {
+        JPanel outerPanel = new JPanel(new BorderLayout());
+        outerPanel.setBackground(BACKGROUND_COLOR);
+        JPanel panel = createCenteredPanel();
+        
+        JLabel titleLabel = createTitleLabel("Crea Nuovo Personale");
+        panel.add(titleLabel);
+        panel.add(Box.createVerticalStrut(30));
+        
+        JTextField nome = new JTextField(30);
+        JTextField cognome = new JTextField(30);
+        JTextField email = new JTextField(30);
+        JPasswordField password = new JPasswordField(30);
+        JComboBox<String> ruoloCombo = new JComboBox<>(new String[]{"volontario", "veterinario"});
+        
+        addLabeledField(panel, "Nome:", nome);
+        addLabeledField(panel, "Cognome:", cognome);
+        addLabeledField(panel, "Email:", email);
+        addLabeledField(panel, "Password:", password);
+        addLabeledField(panel, "Ruolo:", ruoloCombo);
+        panel.add(Box.createVerticalStrut(20));
+        
+        panel.add(createButton("✓ Crea Personale", () -> {
+            try {
+                String ruolo = (String) ruoloCombo.getSelectedItem();
+                getController().adminCreatedPersonale(
+                    nome.getText(),
+                    cognome.getText(),
+                    email.getText(),
+                    new String(password.getPassword()),
+                    ruolo
+                );
+            } catch (Exception ex) {
+                genericError("Errore nei dati inseriti.");
+            }
+        }));
+        
+        panel.add(Box.createVerticalStrut(10));
+        panel.add(createButton("← Annulla", () -> getController().userClickedBack()));
+        panel.add(Box.createVerticalGlue());
+        
+        JScrollPane scrollPane = new JScrollPane(panel);
+        scrollPane.setBackground(BACKGROUND_COLOR);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        outerPanel.add(scrollPane, BorderLayout.CENTER);
+        
+        showPage("nuovoPersonale", outerPanel);
     }
     
     // ============ DETTAGLIO ANIMALE ============

@@ -81,13 +81,8 @@ CREATE TABLE Turno (
 -- =====================================================
 CREATE TABLE Mansione (
     ID_mansione INT PRIMARY KEY AUTO_INCREMENT,
-    descrizione VARCHAR(50) NOT NULL CHECK(descrizione IN(
-        'pulizia recinto',
-        'manutenzione recinto',
-        'distribuzione cibo e acqua',
-        'somministrazione medicinali',
-        'altro'
-    ))
+    descrizione VARCHAR(100) NOT NULL,
+    tipo_mansione ENUM('volontario', 'veterinario') NOT NULL
 );
 
 -- =====================================================
@@ -279,12 +274,15 @@ INSERT INTO Turno (data, fascia_oraria) VALUES (DATE_ADD(CURDATE(), INTERVAL 1 D
 INSERT INTO Turno (data, fascia_oraria) VALUES (DATE_ADD(CURDATE(), INTERVAL 1 DAY), 'pomeriggio');
 INSERT INTO Turno (data, fascia_oraria) VALUES (DATE_ADD(CURDATE(), INTERVAL 2 DAY), 'mattina');
 
--- Inserisci Mansioni
-INSERT INTO Mansione (descrizione) VALUES ('pulizia recinto');
-INSERT INTO Mansione (descrizione) VALUES ('distribuzione cibo e acqua');
-INSERT INTO Mansione (descrizione) VALUES ('somministrazione medicinali');
-INSERT INTO Mansione (descrizione) VALUES ('manutenzione recinto');
-INSERT INTO Mansione (descrizione) VALUES ('altro');
+-- Inserisci Mansioni per VOLONTARI
+INSERT INTO Mansione (descrizione, tipo_mansione) VALUES ('Pulizia recinto', 'volontario');
+INSERT INTO Mansione (descrizione, tipo_mansione) VALUES ('Distribuzione cibo e acqua', 'volontario');
+INSERT INTO Mansione (descrizione, tipo_mansione) VALUES ('Manutenzione recinto', 'volontario');
+
+-- Inserisci Mansioni per VETERINARI
+INSERT INTO Mansione (descrizione, tipo_mansione) VALUES ('Somministrazione medicinali', 'veterinario');
+INSERT INTO Mansione (descrizione, tipo_mansione) VALUES ('Visita animali', 'veterinario');
+INSERT INTO Mansione (descrizione, tipo_mansione) VALUES ('Assistenza veterinaria', 'veterinario');
 
 -- Assegna Turni ai Volontari (SVOLGIMENTO)
 INSERT INTO Svolgimento (ID_utente, data, fascia_oraria) 
@@ -300,11 +298,14 @@ INSERT INTO Svolgimento (ID_utente, data, fascia_oraria)
 VALUES (2, DATE_ADD(CURDATE(), INTERVAL 1 DAY), 'pomeriggio');
 
 -- Assegna Mansioni ai Volontari (AFFIDATO)
-INSERT INTO Affidato (ID_utente, ID_mansione) VALUES (1, 1);
-INSERT INTO Affidato (ID_utente, ID_mansione) VALUES (1, 2);
-INSERT INTO Affidato (ID_utente, ID_mansione) VALUES (2, 2);
-INSERT INTO Affidato (ID_utente, ID_mansione) VALUES (2, 3);
-INSERT INTO Affidato (ID_utente, ID_mansione) VALUES (4, 1);
+INSERT INTO Affidato (ID_utente, ID_mansione) VALUES (2, 1);  
+INSERT INTO Affidato (ID_utente, ID_mansione) VALUES (2, 2);  
+INSERT INTO Affidato (ID_utente, ID_mansione) VALUES (2, 3); 
+
+-- Assegna Mansioni ai Veterinari (AFFIDATO)
+INSERT INTO Affidato (ID_utente, ID_mansione) VALUES (1, 4);  
+INSERT INTO Affidato (ID_utente, ID_mansione) VALUES (1, 5); 
+INSERT INTO Affidato (ID_utente, ID_mansione) VALUES (1, 6);
 
 -- Assegna Mansioni ai Recinti (ASSEGNATO)
 INSERT INTO Assegnato (ID_mansione, ID_recinto) VALUES (1, 1);

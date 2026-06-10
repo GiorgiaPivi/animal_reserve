@@ -51,29 +51,68 @@ public final class MockedModel implements Model {
             LocalDate.of(2019, 7, 22), 2, "Elefante", Optional.of(2)));
         animali.add(new Animale(3, "Pingo", 3, "Antartide", "critico", "Pinguino imperatore giovane",
             LocalDate.of(2023, 1, 5), 3, "Pinguino", Optional.empty()));
+        animali.add(new Animale(4, "Mufasa", 10, "Kenya", "critico", "Leone anziano in recupero",
+            LocalDate.of(2020, 11, 20), 1, "Leone", Optional.of(1)));
+        animali.add(new Animale(5, "Nala", 7, "Tanzania", "critico", "Leonessa con infezione",
+            LocalDate.of(2021, 5, 15), 1, "Leone", Optional.of(2)));
 
         this.controlli = new ArrayList<>();
         this.terapie = new ArrayList<>();
         this.movimentazioni = new ArrayList<>();
         this.trasporti = new ArrayList<>();
+        trasporti.add(new TrasportoEsterno(
+            101,
+            LocalDate.of(2025, 5, 15),
+            "Clinica Veterinaria Centro",
+            "Controllo approfondito",
+            1,
+            2,
+            "Laura",
+            "Bianchi",
+            "Simba"
+        ));
+
+        trasporti.add(new TrasportoEsterno(
+            102,
+            LocalDate.of(2025, 5, 10),
+            "Ospedale Animali Specializzato",
+            "Intervento chirurgico",
+            2,
+            2,
+            "Laura",
+            "Bianchi",
+            "Dumbo"
+        ));
         this.turni = new ArrayList<>();
         turni.add(new Turno(LocalDate.now(), "mattina"));
         turni.add(new Turno(LocalDate.now().plusDays(1), "pomeriggio"));
         
         this.mansioni = new ArrayList<>();
-        mansioni.add(new Mansione(1, "Pulizia recinti"));
-        mansioni.add(new Mansione(2, "Alimentazione animali"));
-        mansioni.add(new Mansione(3, "Assistenza veterinaria"));
-        
+        mansioni.add(new Mansione(1, "Pulizia recinti", "volontario"));
+        mansioni.add(new Mansione(2, "Alimentazione animali", "volontario"));
+        mansioni.add(new Mansione(3, "Manutenzione recinto", "volontario"));
+
+        // Mansioni per VETERINARI
+        mansioni.add(new Mansione(4, "Somministrazione medicinali", "veterinario"));
+        mansioni.add(new Mansione(5, "Visita animali", "veterinario"));
+        mansioni.add(new Mansione(6, "Assistenza veterinaria", "veterinario"));
+
         this.turnoAssegnazioni = new HashMap<>();
         this.mansioneAssegnazioni = new HashMap<>();
-        
+
         // Assegna alcuni turni e mansioni di test
-        turnoAssegnazioni.put(0, 1); // Indice 0 assegnato a utente 1 (veterinario)
-        turnoAssegnazioni.put(1, 2); // Indice 1 assegnato a utente 2 (volontario)
-        
-        mansioneAssegnazioni.put(0, 1); // Indice 0 assegnato a utente 1
-        mansioneAssegnazioni.put(1, 2); // Indice 1 assegnato a utente 2
+        turnoAssegnazioni.put(0, 1); // Indice 0 assegnato a utente 1 (veterinario) - turno
+        turnoAssegnazioni.put(1, 2); // Indice 1 assegnato a utente 2 (volontario) - turno
+
+        // Assegna mansioni da volontario all'utente 2 (volontario)
+        mansioneAssegnazioni.put(0, 2); // Laura (utente 2) - Pulizia recinti (ID 1)
+        mansioneAssegnazioni.put(1, 2); // Laura (utente 2) - Alimentazione animali (ID 2)
+        mansioneAssegnazioni.put(2, 2); // Laura (utente 2) - Manutenzione recinto (ID 3)
+
+        // Assegna mansioni da veterinario all'utente 1 (veterinario)
+        mansioneAssegnazioni.put(3, 1); // Mario (utente 1) - Somministrazione medicinali (ID 4)
+        mansioneAssegnazioni.put(4, 1); // Mario (utente 1) - Visita animali (ID 5)
+        mansioneAssegnazioni.put(5, 1); // Mario (utente 1) - Assistenza veterinaria (ID 6)
     }
 
     @Override
@@ -349,7 +388,6 @@ public final class MockedModel implements Model {
 
     @Override
     public void assegnaTurno(int idUtente, LocalDate data, String fascia) {
-        // Trova il turno e lo assegna all'utente
         turni.stream()
             .filter(t -> t.data.equals(data) && t.fascia.equals(fascia))
             .findFirst()
@@ -359,9 +397,18 @@ public final class MockedModel implements Model {
     }
 
     @Override
-    public void insertMansione(String descrizione) {
+    public void insertMansione(String descrizione, String tipoMansione) {
         int id = ++nextId;
-        mansioni.add(new Mansione(id, descrizione));
+        mansioni.add(new Mansione(id, descrizione, tipoMansione));
+    }
+
+    @Override
+    public void affidaMansione(int idUtente, int idMansione) {
+        int nextIndex = mansioneAssegnazioni.keySet().stream()
+            .mapToInt(Integer::intValue)
+            .max()
+            .orElse(-1) + 1;
+        mansioneAssegnazioni.put(nextIndex, idUtente);
     }
 
     @Override

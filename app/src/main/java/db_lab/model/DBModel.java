@@ -241,8 +241,13 @@ public final class DBModel implements Model {
     }
 
     @Override
-    public void insertMansione(String descrizione) {
-        Mansione.DAO.insert(connection, descrizione);
+    public void insertMansione(String descrizione, String tipoMansione) {
+        Mansione.DAO.insert(connection, descrizione, tipoMansione);
+    }
+
+    @Override
+    public void affidaMansione(int idUtente, int idMansione) {
+        Mansione.DAO.affida(connection, idUtente, idMansione);
     }
 
     @Override

@@ -296,7 +296,7 @@ public final class Queries {
     
     // ------- Mansioni -------
     public static final String INSERT_MANSIONE =
-    "INSERT INTO MANSIONE (descrizione) VALUES (?)";
+    "INSERT INTO MANSIONE (descrizione, tipo_mansione) VALUES (?, ?)";
 
     public static final String INSERT_AFFIDATO =
         """
