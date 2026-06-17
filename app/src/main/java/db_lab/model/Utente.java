@@ -115,6 +115,25 @@ public class Utente {
             }
         }
 
+        public static Optional<Utente> registraConRuolo(Connection connection, String nome, String cognome, String email, String password, String ruolo) {
+            try (var statement = connection.prepareStatement(Queries.INSERT_UTENTE,
+                    java.sql.Statement.RETURN_GENERATED_KEYS)) {
+                statement.setString(1, nome);
+                statement.setString(2, cognome);
+                statement.setString(3, email);
+                statement.setString(4, password);
+                statement.setString(5, ruolo);
+                statement.executeUpdate();
+                var keys = statement.getGeneratedKeys();
+                if (keys.next()) {
+                    return Optional.of(new Utente(keys.getInt(1), nome, cognome, email, password, ruolo));
+                }
+                return Optional.empty();
+            } catch (SQLException e) {
+                throw new DAOException(e);
+            }
+        }
+
         // Lista tutti gli utenti
         public static List<Utente> list(Connection connection) {
             try (var statement = DAOUtils.prepare(connection, Queries.LIST_UTENTI);
@@ -131,6 +150,26 @@ public class Utente {
                     ));
                 }
                 return utenti;
+            } catch (SQLException e) {
+                throw new DAOException(e);
+            }
+        }
+
+        public static List<Utente> listAll(Connection connection) {
+            try (var statement = DAOUtils.prepare(connection, Queries.LIST_PERSONALE);
+                var rs = statement.executeQuery()) {
+                var lista = new ArrayList<Utente>();
+                while (rs.next()) {
+                    lista.add(new Utente(
+                        rs.getInt("ID_utente"),
+                        rs.getString("nome"),
+                        rs.getString("cognome"),
+                        rs.getString("email"),
+                        "",
+                        rs.getString("ruolo")
+                    ));
+                }
+                return lista;
             } catch (SQLException e) {
                 throw new DAOException(e);
             }

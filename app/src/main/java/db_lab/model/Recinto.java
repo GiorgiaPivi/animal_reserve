@@ -46,12 +46,7 @@ public final class Recinto {
 
     @Override
     public String toString() {
-        return Printer.stringify("Recinto", List.of(
-            Printer.field("id", this.id),
-            Printer.field("tipologia", this.tipologia),
-            Printer.field("capienza", this.capienza),
-            Printer.field("occupazione", this.occupazione)
-        ));
+        return tipologia + " (capienza: " + capienza + ", occupati: " + occupazione + ")";
     }
 
     public static final class DAO {
@@ -65,7 +60,7 @@ public final class Recinto {
                         rs.getInt("ID_recinto"), 
                         rs.getString("tipo_recinto"),
                         rs.getInt("capienza"),
-                        0
+                        rs.getInt("occupazione")
                     ));
                 }
                 return recinti;
@@ -133,4 +128,5 @@ public final class Recinto {
         }
 
     }
+
 }

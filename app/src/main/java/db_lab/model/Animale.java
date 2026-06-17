@@ -222,5 +222,15 @@ public final class Animale {
                 recinto
             );
         }
+
+        public static void updateRecinto(Connection connection, int idAnimale, int idRecinto) {
+            try (var stmt = connection.prepareStatement(Queries.UPDATE_RECINTO_ANIMALE)) {
+                stmt.setInt(1, idRecinto);
+                stmt.setInt(2, idAnimale);
+                stmt.executeUpdate();
+            } catch (SQLException e) {
+                throw new DAOException(e);
+            }
+        }
     }
 }

@@ -269,4 +269,19 @@ public final class DBModel implements Model {
     public List<Mansione> mansioniByUtente(int idUtente) {
         return Mansione.DAO.listByUtente(connection,idUtente);
     }
+
+    @Override
+    public void updateRecintoAnimale(int idAnimale, int idRecinto) {
+        Animale.DAO.updateRecinto(connection, idAnimale, idRecinto);
+    }
+    
+    @Override
+    public Optional<Utente> registraConRuolo(String nome, String cognome, String email, String password, String ruolo) {
+        return Utente.DAO.registraConRuolo(connection, nome, cognome, email, password, ruolo);
+    }
+    
+    @Override
+    public List<Utente> listPersonale() {
+        return Utente.DAO.listAll(connection);
+    }
 }

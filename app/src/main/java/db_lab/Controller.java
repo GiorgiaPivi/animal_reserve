@@ -3,9 +3,11 @@ package db_lab;
 import db_lab.data.DAOException;
 import db_lab.model.Animale;
 import db_lab.model.Model;
+import db_lab.model.Recinto;
 import db_lab.model.Utente;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -184,7 +186,7 @@ public final class Controller {
     }
 
     public void userSubmittedNuovoAnimale(String nome, int eta, String provenienza,
-            String statoDiSalute, String descrizione, int idSpecie) {
+        String statoDiSalute, String descrizione, int idSpecie, int idRecinto) {
         // Validazione input
         if (nome == null || nome.trim().isEmpty()) {
             this.view.genericError("Il nome dell'animale è obbligatorio.");
@@ -201,7 +203,7 @@ public final class Controller {
         
         try {
             int id = this.model.insertAnimale(nome, eta, provenienza, statoDiSalute,
-                descrizione, LocalDate.now(), idSpecie, Optional.empty());
+    descrizione, LocalDate.now(), idSpecie, Optional.of(idRecinto));
             this.view.animaleRegistrato(id);
             this.loadAnimaliPage();
         } catch (DAOException e) {
@@ -436,6 +438,7 @@ public final class Controller {
             }
 
             int id = this.model.insertMovimentazione(LocalDate.now(), idAnimale, idRecintoDestinazione);
+            this.model.updateRecintoAnimale(idAnimale, idRecintoDestinazione);
             this.view.genericMessage("Movimentazione registrata con ID: " + id);
             this.loadAnimaliPage();
         } catch (DAOException e) {
@@ -634,7 +637,7 @@ public final class Controller {
         }
         
         try {
-            this.model.registra(nome, cognome, email, password);
+            this.model.registraConRuolo(nome, cognome, email, password, ruolo);
             this.view.genericMessage("Personale creato con successo.");
             this.loadAnimaliPage();
         } catch (DAOException e) {
@@ -642,4 +645,28 @@ public final class Controller {
         }
     }
 
+    public List<Recinto> getRecintiDisponibili() {
+        try {
+            return this.model.recintiDisponibili();
+        } catch (Exception e) {
+            return List.of();
+        }
+    }
+
+    public Optional<Recinto> getRecintoAnimale(int idRecinto) {
+        try {
+            return this.model.findRecinto(idRecinto);
+        } catch (Exception e) {
+            return Optional.empty();
+        }
+    }
+
+    public void adminClickedPersonale() {
+        try {
+            var personale = this.model.listPersonale();
+            this.view.personalePage(personale);
+        } catch (DAOException e) {
+            this.view.genericError("Errore nel caricamento personale.");
+        }
+    }
 }

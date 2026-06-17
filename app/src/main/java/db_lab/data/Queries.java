@@ -38,11 +38,21 @@ public final class Queries {
 
     public static final String LIST_RECINTI =
         """
-        SELECT * FROM Recinto ORDER BY ID_recinto
+        SELECT R.ID_recinto, R.tipo_recinto, R.capienza,
+            COUNT(A.ID_animale) AS occupazione
+        FROM Recinto R
+        LEFT JOIN Animale A ON R.ID_recinto = A.ID_recinto
+        GROUP BY R.ID_recinto, R.tipo_recinto, R.capienza
+        ORDER BY R.ID_recinto
         """;
 
     public static final String INSERT_RECINTO =
         "INSERT INTO RECINTO (tipo_recinto) VALUES (?)";
+
+    public static final String UPDATE_RECINTO_ANIMALE =
+        """
+        UPDATE Animale SET ID_recinto = ? WHERE ID_animale = ?
+        """;
 
     // ------- Animale -------
 
@@ -306,10 +316,28 @@ public final class Queries {
         """;
 
     public static final String LIST_MANSIONI =
-        "SELECT ID_mansione, descrizione FROM MANSIONE ORDER BY ID_mansione";
+        "SELECT ID_mansione, descrizione, tipo_mansione FROM Mansione ORDER BY ID_mansione";
 
-    public static final String LIST_MANSIONI_BY_UTENTE = 
-        "SELECT m.ID_mansione, m.descrizione FROM mansione m " +
+        public static final String LIST_MANSIONI_BY_UTENTE = 
+        "SELECT m.ID_mansione, m.descrizione, m.tipo_mansione FROM Mansione m " +
         "JOIN assegnazione_mansione am ON m.ID_mansione = am.ID_mansione " +
         "WHERE am.ID_utente = ?";
+
+    public static final String FIND_RECINTO_BY_ANIMALE =
+        """
+        SELECT R.ID_recinto, R.tipo_recinto, R.capienza,
+            COUNT(A2.ID_animale) AS occupazione
+        FROM Recinto R
+        JOIN Animale A ON A.ID_recinto = R.ID_recinto
+        LEFT JOIN Animale A2 ON A2.ID_recinto = R.ID_recinto
+        WHERE A.ID_animale = ?
+        GROUP BY R.ID_recinto, R.tipo_recinto, R.capienza
+        """;
+        
+        public static final String LIST_PERSONALE =
+        """
+        SELECT ID_utente, nome, cognome, email, ruolo
+        FROM Utente
+        ORDER BY ruolo, cognome
+        """;
 }

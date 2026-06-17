@@ -14,6 +14,10 @@ public interface Model {
 
     Optional<Utente> registra(String nome, String cognome, String email, String password);
 
+    Optional<Utente> registraConRuolo(String nome, String cognome, String email, String password, String ruolo);
+
+    List<Utente> listPersonale();
+
     // ------- Specie -------
 
     List<Specie> specie();
@@ -67,6 +71,8 @@ public interface Model {
     Optional<Recinto> findRecinto(int idRecinto);
 
     int contaAnimaliInRecinto(int idRecinto);
+
+    void updateRecintoAnimale(int idAnimale, int idRecinto);
 
     // ------- Movimentazione -------
 

@@ -433,4 +433,19 @@ public final class MockedModel implements Model {
             .filter(m -> mansioneAssegnazioni.containsValue(idUtente))
             .toList();
     }
+
+    @Override
+    public void updateRecintoAnimale(int idAnimale, int idRecinto) {
+        // mock: non fa nulla
+    }
+
+    @Override
+    public Optional<Utente> registraConRuolo(String nome, String cognome, String email, String password, String ruolo) {
+        return Optional.empty();
+    }
+
+    @Override
+    public List<Utente> listPersonale() {
+        return List.of();
+    }
 }

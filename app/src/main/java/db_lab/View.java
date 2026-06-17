@@ -162,39 +162,100 @@ public final class View extends JFrame {
     // ============ LOGIN ============
     
     public void loginPage() {
-        JPanel panel = createCenteredPanel();
-        
+        JPanel outerPanel = new JPanel(new GridBagLayout());
+        outerPanel.setBackground(BACKGROUND_COLOR);
+
+        JPanel card = new JPanel();
+        card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
+        card.setBackground(Color.WHITE);
+        card.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(BORDER_COLOR, 1),
+            new EmptyBorder(40, 50, 40, 50)
+        ));
+        card.setMaximumSize(new Dimension(400, 500));
+
         JLabel title = createTitleLabel("Centro Recupero Animali");
-        panel.add(title);
-        panel.add(Box.createVerticalStrut(10));
-        
+        title.setAlignmentX(Component.CENTER_ALIGNMENT);
+        card.add(title);
+        card.add(Box.createVerticalStrut(8));
+
         JLabel subtitle = new JLabel("Gestione Centro Veterinario");
-        subtitle.setFont(new Font("Segoe UI", Font.ITALIC, 14));
+        subtitle.setFont(new Font("Segoe UI", Font.ITALIC, 13));
         subtitle.setForeground(new Color(127, 140, 141));
         subtitle.setAlignmentX(Component.CENTER_ALIGNMENT);
-        panel.add(subtitle);
-        panel.add(Box.createVerticalStrut(40));
-        
-        JTextField email = new JTextField(20);
-        JPasswordField pass = new JPasswordField(20);
-        addLabeledField(panel, "Email:", email);
-        addLabeledField(panel, "Password:", pass);
-        panel.add(Box.createVerticalStrut(20));
-        
-        JButton loginBtn = createButton("Accedi", () -> 
+        card.add(subtitle);
+        card.add(Box.createVerticalStrut(30));
+
+        JTextField email = new JTextField();
+        email.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        email.setMaximumSize(new Dimension(Integer.MAX_VALUE, 35));
+        email.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(BORDER_COLOR, 1),
+            new EmptyBorder(5, 10, 5, 10)
+        ));
+
+        JPasswordField pass = new JPasswordField();
+        pass.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        pass.setMaximumSize(new Dimension(Integer.MAX_VALUE, 35));
+        pass.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(BORDER_COLOR, 1),
+            new EmptyBorder(5, 10, 5, 10)
+        ));
+
+        JLabel emailLabel = new JLabel("Email");
+        emailLabel.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        emailLabel.setForeground(TEXT_COLOR);
+        emailLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        JLabel passLabel = new JLabel("Password");
+        passLabel.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        passLabel.setForeground(TEXT_COLOR);
+        passLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        card.add(emailLabel);
+        card.add(Box.createVerticalStrut(5));
+        card.add(email);
+        card.add(Box.createVerticalStrut(15));
+        card.add(passLabel);
+        card.add(Box.createVerticalStrut(5));
+        card.add(pass);
+        card.add(Box.createVerticalStrut(25));
+
+        JButton loginBtn = new JButton("Accedi");
+        loginBtn.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        loginBtn.setForeground(Color.WHITE);
+        loginBtn.setBackground(PRIMARY_COLOR);
+        loginBtn.setBorder(BorderFactory.createEmptyBorder(12, 0, 12, 0));
+        loginBtn.setFocusPainted(false);
+        loginBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        loginBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
+        loginBtn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 45));
+        loginBtn.addActionListener(e ->
             getController().userSubmittedLogin(email.getText(), new String(pass.getPassword()))
         );
-        panel.add(loginBtn);
-        
-        panel.add(Box.createVerticalStrut(10));
-        
-        JButton registerBtn = createButton("Registrati", () -> registrazionePage());
-        panel.add(registerBtn);
-        panel.add(Box.createVerticalGlue());
-        
-        showPage("login", panel);
+
+        JButton registerBtn = new JButton("Registrati");
+        registerBtn.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        registerBtn.setForeground(PRIMARY_COLOR);
+        registerBtn.setBackground(Color.WHITE);
+        registerBtn.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(PRIMARY_COLOR, 1),
+            new EmptyBorder(10, 0, 10, 0)
+        ));
+        registerBtn.setFocusPainted(false);
+        registerBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        registerBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
+        registerBtn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+        registerBtn.addActionListener(e -> registrazionePage());
+
+        card.add(loginBtn);
+        card.add(Box.createVerticalStrut(10));
+        card.add(registerBtn);
+
+        outerPanel.add(card);
+        showPage("login", outerPanel);
     }
-    
+
     public void loginFailed(String reason) {
         genericError(reason);
         loginPage();
@@ -306,98 +367,119 @@ public final class View extends JFrame {
     public void animaliPage(List<Animale> animali, Utente utente) {
         JPanel mainContent = new JPanel(new BorderLayout());
         mainContent.setBackground(BACKGROUND_COLOR);
-        mainContent.setBorder(new EmptyBorder(15, 20, 15, 20));
-        
-        // Header
+
+        // ---- HEADER ----
         JPanel header = new JPanel(new BorderLayout());
         header.setBackground(PRIMARY_COLOR);
-        header.setBorder(new EmptyBorder(15, 20, 15, 20));
-        
+        header.setBorder(new EmptyBorder(15, 25, 15, 25));
+
         JLabel welcome = new JLabel("Benvenuto " + utente.nome + " " + utente.cognome);
         welcome.setFont(new Font("Segoe UI", Font.BOLD, 16));
         welcome.setForeground(Color.WHITE);
         header.add(welcome, BorderLayout.WEST);
-        
+
         JButton logoutBtn = new JButton("Logout");
         logoutBtn.setFont(new Font("Segoe UI", Font.PLAIN, 11));
         logoutBtn.setForeground(Color.WHITE);
         logoutBtn.setBackground(new Color(192, 57, 43));
-        logoutBtn.setBorder(BorderFactory.createEmptyBorder(5, 15, 5, 15));
+        logoutBtn.setBorder(BorderFactory.createEmptyBorder(6, 18, 6, 18));
         logoutBtn.setFocusPainted(false);
         logoutBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
         logoutBtn.addActionListener(e -> getController().userClickedLogout());
         header.add(logoutBtn, BorderLayout.EAST);
-        
+
         mainContent.add(header, BorderLayout.NORTH);
-        
-        // Lista animali con scroll
+
+        // ---- LISTA ANIMALI ----
         JPanel listPanel = new JPanel();
         listPanel.setLayout(new BoxLayout(listPanel, BoxLayout.Y_AXIS));
         listPanel.setBackground(BACKGROUND_COLOR);
-        listPanel.setBorder(new EmptyBorder(15, 15, 15, 15));
-        
+        listPanel.setBorder(new EmptyBorder(20, 40, 20, 40));
+
         JLabel count = new JLabel("Animali nel centro: " + animali.size());
-        count.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        count.setFont(new Font("Segoe UI", Font.BOLD, 15));
         count.setForeground(PRIMARY_COLOR);
+        count.setAlignmentX(Component.LEFT_ALIGNMENT);
         listPanel.add(count);
-        listPanel.add(Box.createVerticalStrut(15));
-        
+        listPanel.add(Box.createVerticalStrut(12));
+
         for (Animale a : animali) {
-            JPanel animalRow = new JPanel(new BorderLayout());
-            animalRow.setBackground(Color.WHITE);
-            animalRow.setBorder(BorderFactory.createCompoundBorder(
+            JPanel row = new JPanel(new BorderLayout(15, 0));
+            row.setBackground(Color.WHITE);
+            row.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(BORDER_COLOR, 1),
-                new EmptyBorder(12, 15, 12, 15)
+                new EmptyBorder(10, 18, 10, 12)
             ));
-            animalRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, 70));
-            
-            JLabel info = new JLabel(a.nome + " - " + a.nomeSpecie + " (età: " + a.eta + " anni)");
-            info.setFont(new Font("Segoe UI", Font.BOLD, 13));
-            info.setForeground(TEXT_COLOR);
-            animalRow.add(info, BorderLayout.CENTER);
-            
-            JButton detailBtn = createButton("Dettagli", () -> getController().userClickedAnimale(a));
-            animalRow.add(detailBtn, BorderLayout.EAST);
-            
-            listPanel.add(animalRow);
-            listPanel.add(Box.createVerticalStrut(8));
+            row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 55));
+            row.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+            JPanel textPanel = new JPanel(new BorderLayout());
+            textPanel.setBackground(Color.WHITE);
+
+            JLabel nome = new JLabel(a.nome + " — " + a.nomeSpecie);
+            nome.setFont(new Font("Segoe UI", Font.BOLD, 13));
+            nome.setForeground(TEXT_COLOR);
+
+            JLabel dettagli = new JLabel("Età: " + a.eta + " anni  •  Stato: " + a.statoDiSalute);
+            dettagli.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+            dettagli.setForeground(new Color(130, 140, 150));
+
+            textPanel.add(nome, BorderLayout.NORTH);
+            textPanel.add(dettagli, BorderLayout.SOUTH);
+
+            JButton btn = createButton("Dettagli →", () -> getController().userClickedAnimale(a));
+            btn.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+
+            row.add(textPanel, BorderLayout.CENTER);
+            row.add(btn, BorderLayout.EAST);
+
+            listPanel.add(row);
+            listPanel.add(Box.createVerticalStrut(6));
         }
-        
+
         JScrollPane scrollPane = new JScrollPane(listPanel);
         scrollPane.setBackground(BACKGROUND_COLOR);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
         mainContent.add(scrollPane, BorderLayout.CENTER);
-        
-        // Pulsanti azioni
-        JPanel actionsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
-        actionsPanel.setBackground(BACKGROUND_COLOR);
-        actionsPanel.setBorder(BorderFactory.createCompoundBorder(
+
+        // ---- BARRA AZIONI ----
+        JPanel actionsBar = new JPanel(new BorderLayout());
+        actionsBar.setBackground(Color.WHITE);
+        actionsBar.setBorder(BorderFactory.createCompoundBorder(
             BorderFactory.createMatteBorder(1, 0, 0, 0, BORDER_COLOR),
-            new EmptyBorder(15, 15, 15, 15)
+            new EmptyBorder(12, 25, 12, 25)
         ));
-        
-        if (utente.isVeterinario()) {
-            actionsPanel.add(createButton("+ Nuovo Animale", () -> getController().userRequestedNuovoAnimale()));
-        }
-        actionsPanel.add(createButton("Specie", () -> getController().userClickedSpecie()));
-        actionsPanel.add(createButton("Recinti", () -> getController().userClickedRecinti()));
-        actionsPanel.add(createButton("Trasporti", () -> getController().userClickedTuttiTrasporti()));
-        actionsPanel.add(createButton("Statistiche", () -> getController().userClickedStatisticheGenerali()));
-        if (utente.isVeterinario()) {
-            actionsPanel.add(createButton(" Animali da Controllare", () -> getController().userClickedAnimaliDaControllare()));
-            actionsPanel.add(Box.createVerticalStrut(10));
-        }
 
+        // Gruppo sinistra — operazioni principali
+        JPanel left = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
+        left.setBackground(Color.WHITE);
+        if (utente.isVeterinario()) {
+            left.add(createButton("+ Nuovo Animale", () -> getController().userRequestedNuovoAnimale()));
+        }
+        left.add(createButton("Specie", () -> getController().userClickedSpecie()));
+        left.add(createButton("Recinti", () -> getController().userClickedRecinti()));
+        left.add(createButton("Trasporti", () -> getController().userClickedTuttiTrasporti()));
+        left.add(createButton("Statistiche", () -> getController().userClickedStatisticheGenerali()));
+
+        // Gruppo destra — funzioni staff
+        JPanel right = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
+        right.setBackground(Color.WHITE);
+        if (utente.isVeterinario()) {
+            right.add(createButton("Animali da Controllare", () -> getController().userClickedAnimaliDaControllare()));
+        }
         if (utente.isVeterinario() || utente.isVolontario()) {
-            actionsPanel.add(createButton("Turni", () -> getController().userClickedTurni()));
-            actionsPanel.add(createButton("Mansioni", () -> getController().userClickedMansioni()));
+            right.add(createButton("Turni", () -> getController().userClickedTurni()));
+            right.add(createButton("Mansioni", () -> getController().userClickedMansioni()));
+        }
+        if (utente.ruolo.equalsIgnoreCase("admin")) {
+            right.add(createButton("⚙ Admin Panel", () -> getController().userClickedAdminPanel()));
         }
 
-        if (utente.ruolo.equalsIgnoreCase("admin")) {
-            actionsPanel.add(createButton("⚙️ Admin Panel", () -> getController().userClickedAdminPanel()));
-        }
-        
-        mainContent.add(actionsPanel, BorderLayout.SOUTH);
+        actionsBar.add(left, BorderLayout.WEST);
+        actionsBar.add(right, BorderLayout.EAST);
+        mainContent.add(actionsBar, BorderLayout.SOUTH);
+
         showPage("animali", mainContent);
     }
     public void adminPanelPage() {
@@ -423,6 +505,8 @@ public final class View extends JFrame {
         panel.add(Box.createVerticalStrut(20));
 
         panel.add(createButton("+ Crea Personale", () -> getController().userRequestedNuovoPersonale()));
+        panel.add(Box.createVerticalStrut(10));
+        panel.add(createButton("Visualizza Personale", () -> getController().adminClickedPersonale()));
         panel.add(Box.createVerticalStrut(10));
         
         panel.add(createButton("← Indietro", () -> getController().userClickedBack()));
@@ -607,83 +691,196 @@ public final class View extends JFrame {
     public void dettaglioAnimale(Animale a, Utente u) {
         JPanel outerPanel = new JPanel(new BorderLayout());
         outerPanel.setBackground(BACKGROUND_COLOR);
-        JPanel panel = createCenteredPanel();
-        
+
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setBorder(new EmptyBorder(30, 80, 30, 80));
+        panel.setBackground(BACKGROUND_COLOR);
+
         JLabel titleLabel = createTitleLabel("Dettaglio Animale: " + a.nome);
         panel.add(titleLabel);
         panel.add(Box.createVerticalStrut(20));
-        
-        // Pannello informazioni
-        JPanel infoBox = new JPanel();
-        infoBox.setLayout(new BoxLayout(infoBox, BoxLayout.Y_AXIS));
+
+        // ---- INFO BOX ----
+        JPanel infoBox = new JPanel(new GridLayout(0, 2, 10, 10));
         infoBox.setBackground(Color.WHITE);
         infoBox.setBorder(BorderFactory.createCompoundBorder(
             BorderFactory.createLineBorder(BORDER_COLOR, 1),
-            new EmptyBorder(15, 15, 15, 15)
+            new EmptyBorder(20, 25, 20, 25)
         ));
-        
-        infoBox.add(createInfoLabel("Nome: " + a.nome));
-        infoBox.add(Box.createVerticalStrut(8));
-        infoBox.add(createInfoLabel("Specie: " + a.nomeSpecie));
-        infoBox.add(Box.createVerticalStrut(8));
-        infoBox.add(createInfoLabel("Età: " + a.eta + " anni"));
-        infoBox.add(Box.createVerticalStrut(8));
-        infoBox.add(createInfoLabel("Provenienza: " + a.provenienza));
-        infoBox.add(Box.createVerticalStrut(8));
-        infoBox.add(createInfoLabel("Stato di salute: " + a.statoDiSalute));
-        infoBox.add(Box.createVerticalStrut(8));
-        infoBox.add(createInfoLabel("Data arrivo: " + a.dataArrivo));
-        infoBox.add(Box.createVerticalStrut(8));
-        infoBox.add(createInfoLabel("Descrizione: " + a.descrizione));
-        
-        panel.add(infoBox);
-        panel.add(Box.createVerticalStrut(20));
-        
-        if (u.isVolontario() || u.isVeterinario()) {
-            JLabel updateLabel = createSubtitleLabel("Aggiorna Stato di Salute");
-            panel.add(updateLabel);
-            panel.add(Box.createVerticalStrut(10));
-            
-            JComboBox<String> nuovoStato = new JComboBox<>(new String[]{"buono", "discreto", "cattivo"});
-            nuovoStato.setSelectedItem(a.statoDiSalute);
-            addLabeledField(panel, "Nuovo Stato:", nuovoStato);
-            panel.add(Box.createVerticalStrut(10));
-            panel.add(createButton("Salva stato", () ->
-                getController().userSubmittedAggiornaStato(a.id, (String) nuovoStato.getSelectedItem())
-            ));
-            panel.add(Box.createVerticalStrut(20));
+
+        java.util.function.BiConsumer<String, String> addRow = (label, value) -> {
+            JLabel l = new JLabel(label);
+            l.setFont(new Font("Segoe UI", Font.BOLD, 13));
+            l.setForeground(new Color(100, 120, 140));
+            JLabel v = new JLabel(value);
+            v.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+            v.setForeground(TEXT_COLOR);
+            infoBox.add(l);
+            infoBox.add(v);
+        };
+
+        addRow.accept("Nome", a.nome);
+        addRow.accept("Specie", a.nomeSpecie);
+        addRow.accept("Età", a.eta + " anni");
+        addRow.accept("Provenienza", a.provenienza);
+        addRow.accept("Stato di salute", a.statoDiSalute);
+
+        if (a.idRecinto.isPresent()) {
+            var recinto = getController().getRecintoAnimale(a.idRecinto.get());
+            String recintoInfo = recinto.isPresent()
+                ? recinto.get().tipologia + " (ID: " + recinto.get().id + ")"
+                : "ID " + a.idRecinto.get();
+            addRow.accept("Recinto", recintoInfo);
+        } else {
+            addRow.accept("Recinto", "non assegnato");
         }
-        
+
+        addRow.accept("Data arrivo", a.dataArrivo.toString());
+        addRow.accept("Descrizione", a.descrizione == null || a.descrizione.isEmpty() ? "—" : a.descrizione);
+
+        panel.add(infoBox);
+        panel.add(Box.createVerticalStrut(25));
+
+        // ---- SEZIONE VETERINARIO ----
         if (u.isVeterinario()) {
+            JPanel sectionVet = new JPanel();
+            sectionVet.setLayout(new BoxLayout(sectionVet, BoxLayout.Y_AXIS));
+            sectionVet.setBackground(Color.WHITE);
+            sectionVet.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(BORDER_COLOR, 1),
+                new EmptyBorder(20, 25, 20, 25)
+            ));
+
             JLabel checkupLabel = createSubtitleLabel("Registra Controllo Sanitario");
-            panel.add(checkupLabel);
-            panel.add(Box.createVerticalStrut(10));
-            
+            sectionVet.add(checkupLabel);
+            sectionVet.add(Box.createVerticalStrut(15));
+
             JComboBox<String> tipo = new JComboBox<>(new String[]{
-                "visita di routine", "esami delle feci", "valutazione respiratoria", "valutazione muscolare"
+                "visita di routine", "esami delle feci", "valutazione respiratoria",
+                "valutazione cardiaca", "valutazione post operatoria",
+                "monitoraggio terapia", "richiamo vaccinale", "altro"
             });
-            JComboBox<String> esito = new JComboBox<>(new String[]{"positivo", "negativo", "dubbio"});
-            addLabeledField(panel, "Tipologia:", tipo);
-            addLabeledField(panel, "Esito:", esito);
-            panel.add(Box.createVerticalStrut(10));
-            panel.add(createButton("Registra controllo", () ->
+            JComboBox<String> esito = new JComboBox<>(new String[]{"positivo", "negativo", "da monitorare"});
+
+            JPanel tipoRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 5));
+            tipoRow.setBackground(Color.WHITE);
+            JLabel tipoLabel = new JLabel("Tipologia:  ");
+            tipoLabel.setFont(new Font("Segoe UI", Font.BOLD, 12));
+            tipoRow.add(tipoLabel);
+            tipoRow.add(tipo);
+            sectionVet.add(tipoRow);
+
+            JPanel esitoRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 5));
+            esitoRow.setBackground(Color.WHITE);
+            JLabel esitoLabel = new JLabel("Esito:         ");
+            esitoLabel.setFont(new Font("Segoe UI", Font.BOLD, 12));
+            esitoRow.add(esitoLabel);
+            esitoRow.add(esito);
+            sectionVet.add(esitoRow);
+
+            sectionVet.add(Box.createVerticalStrut(15));
+
+            JPanel btnRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
+            btnRow.setBackground(Color.WHITE);
+            btnRow.add(createButton("Registra controllo", () ->
                 getController().userSubmittedNuovoControllo(a.id,
                     (String) tipo.getSelectedItem(),
                     (String) esito.getSelectedItem())
             ));
-            panel.add(Box.createVerticalStrut(10));
-            panel.add(createButton("Storico controlli", () -> 
+            btnRow.add(createButton("Storico controlli", () ->
                 getController().userClickedStoricoControlli(a.id)));
+            sectionVet.add(btnRow);
+
+            panel.add(sectionVet);
+            panel.add(Box.createVerticalStrut(25));
         }
-        
-        panel.add(Box.createVerticalStrut(20));
+
+        // ---- SEZIONE AGGIORNA STATO ----
+        if (u.isVolontario() || u.isVeterinario()) {
+            JPanel sectionStato = new JPanel();
+            sectionStato.setLayout(new BoxLayout(sectionStato, BoxLayout.Y_AXIS));
+            sectionStato.setBackground(Color.WHITE);
+            sectionStato.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(BORDER_COLOR, 1),
+                new EmptyBorder(20, 25, 20, 25)
+            ));
+
+            sectionStato.add(createSubtitleLabel("Aggiorna Stato di Salute"));
+            sectionStato.add(Box.createVerticalStrut(15));
+
+            JPanel statoRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 5));
+            statoRow.setBackground(Color.WHITE);
+            JLabel statoLabel = new JLabel("Nuovo Stato:  ");
+            statoLabel.setFont(new Font("Segoe UI", Font.BOLD, 12));
+            JComboBox<String> nuovoStato = new JComboBox<>(new String[]{"buono", "discreto", "critico"});
+            nuovoStato.setSelectedItem(a.statoDiSalute);
+            statoRow.add(statoLabel);
+            statoRow.add(nuovoStato);
+            sectionStato.add(statoRow);
+
+            sectionStato.add(Box.createVerticalStrut(15));
+            JPanel btnStato = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+            btnStato.setBackground(Color.WHITE);
+            btnStato.add(createButton("Salva stato", () ->
+                getController().userSubmittedAggiornaStato(a.id, (String) nuovoStato.getSelectedItem())
+            ));
+            sectionStato.add(btnStato);
+
+            panel.add(sectionStato);
+            panel.add(Box.createVerticalStrut(25));
+        }
+
+        // ---- SEZIONE SPOSTA RECINTO ----
+        if (u.isVolontario() || u.isVeterinario()) {
+            JPanel sectionRecinto = new JPanel();
+            sectionRecinto.setLayout(new BoxLayout(sectionRecinto, BoxLayout.Y_AXIS));
+            sectionRecinto.setBackground(Color.WHITE);
+            sectionRecinto.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(BORDER_COLOR, 1),
+                new EmptyBorder(20, 25, 20, 25)
+            ));
+
+            sectionRecinto.add(createSubtitleLabel("Sposta in Recinto"));
+            sectionRecinto.add(Box.createVerticalStrut(15));
+
+            var recinti = getController().getRecintiDisponibili();
+            if (recinti.isEmpty()) {
+                sectionRecinto.add(createInfoLabel("Nessun recinto disponibile."));
+            } else {
+                JPanel recintoRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 5));
+                recintoRow.setBackground(Color.WHITE);
+                JLabel recintoLabel = new JLabel("Destinazione:  ");
+                recintoLabel.setFont(new Font("Segoe UI", Font.BOLD, 12));
+                JComboBox<Recinto> recintoCombo = new JComboBox<>(recinti.toArray(new Recinto[0]));
+                recintoRow.add(recintoLabel);
+                recintoRow.add(recintoCombo);
+                sectionRecinto.add(recintoRow);
+                sectionRecinto.add(Box.createVerticalStrut(15));
+
+                JPanel btnRecinto = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+                btnRecinto.setBackground(Color.WHITE);
+                btnRecinto.add(createButton("Sposta", () -> {
+                    Recinto selezionato = (Recinto) recintoCombo.getSelectedItem();
+                    if (selezionato != null) {
+                        getController().userSubmittedMovimentazione(a.id, selezionato.id);
+                    }
+                }));
+                sectionRecinto.add(btnRecinto);
+            }
+
+            panel.add(sectionRecinto);
+            panel.add(Box.createVerticalStrut(25));
+        }
+
         panel.add(createButton("← Indietro", () -> getController().userClickedBack()));
-        
+        panel.add(Box.createVerticalGlue());
+
         JScrollPane scrollPane = new JScrollPane(panel);
         scrollPane.setBackground(BACKGROUND_COLOR);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
         outerPanel.add(scrollPane, BorderLayout.CENTER);
-        
+
         showPage("dettaglio", outerPanel);
     }
     
@@ -692,38 +889,62 @@ public final class View extends JFrame {
     public void speciePage(List<Specie> specie, IntUnaryOperator conta) {
         JPanel outerPanel = new JPanel(new BorderLayout());
         outerPanel.setBackground(BACKGROUND_COLOR);
-        JPanel panel = createCenteredPanel();
-        
-        JLabel title = createTitleLabel("Elenco Specie");
-        panel.add(title);
-        panel.add(Box.createVerticalStrut(20));
-        
-        JPanel specieBox = new JPanel();
-        specieBox.setLayout(new BoxLayout(specieBox, BoxLayout.Y_AXIS));
-        specieBox.setBackground(Color.WHITE);
-        specieBox.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(BORDER_COLOR, 1),
-            new EmptyBorder(15, 15, 15, 15)
-        ));
-        
+
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBackground(BACKGROUND_COLOR);
+        panel.setBorder(new EmptyBorder(30, 25, 30, 25));
+
+        // Titolo
+        JLabel title = new JLabel("Elenco Specie");
+        title.setFont(new Font("Segoe UI", Font.BOLD, 24));
+        title.setForeground(PRIMARY_COLOR);
+        title.setBorder(new EmptyBorder(0, 0, 15, 0));
+        panel.add(title, BorderLayout.NORTH);
+
+        // Lista specie
+        JPanel listPanel = new JPanel();
+        listPanel.setLayout(new BoxLayout(listPanel, BoxLayout.Y_AXIS));
+        listPanel.setBackground(BACKGROUND_COLOR);
+
         for (Specie s : specie) {
-            JLabel specieLabel = new JLabel( s.nome + " (" + conta.applyAsInt(s.id) + " animali)");
-            specieLabel.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-            specieLabel.setForeground(TEXT_COLOR);
-            specieBox.add(specieLabel);
-            specieBox.add(Box.createVerticalStrut(8));
+            int num = conta.applyAsInt(s.id);
+
+            JPanel card = new JPanel(new BorderLayout(15, 0));
+            card.setBackground(Color.WHITE);
+            card.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(BORDER_COLOR, 1),
+                new EmptyBorder(12, 20, 12, 20)
+            ));
+            card.setMaximumSize(new Dimension(Integer.MAX_VALUE, 55));
+
+            JLabel nomeLabel = new JLabel(s.nome);
+            nomeLabel.setFont(new Font("Segoe UI", Font.BOLD, 13));
+            nomeLabel.setForeground(TEXT_COLOR);
+
+            JLabel numLabel = new JLabel(num + " " + (num == 1 ? "animale" : "animali"));
+            numLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+            numLabel.setForeground(new Color(130, 140, 150));
+
+            card.add(nomeLabel, BorderLayout.WEST);
+            card.add(numLabel, BorderLayout.EAST);
+
+            listPanel.add(card);
+            listPanel.add(Box.createVerticalStrut(6));
         }
-        
-        panel.add(specieBox);
-        panel.add(Box.createVerticalStrut(20));
-        panel.add(createButton("← Indietro", () -> getController().userClickedBack()));
-        panel.add(Box.createVerticalGlue());
-        
+
+        // Bottone indietro
+        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 15));
+        bottomPanel.setBackground(BACKGROUND_COLOR);
+        bottomPanel.add(createButton("← Indietro", () -> getController().userClickedBack()));
+
+        panel.add(listPanel, BorderLayout.CENTER);
+        panel.add(bottomPanel, BorderLayout.SOUTH);
+
         JScrollPane scrollPane = new JScrollPane(panel);
         scrollPane.setBackground(BACKGROUND_COLOR);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
         outerPanel.add(scrollPane, BorderLayout.CENTER);
-        
+
         showPage("specie", outerPanel);
     }
     
@@ -733,50 +954,86 @@ public final class View extends JFrame {
         JPanel outerPanel = new JPanel(new BorderLayout());
         outerPanel.setBackground(BACKGROUND_COLOR);
         JPanel panel = createCenteredPanel();
-        
+
         JLabel titleLabel = createTitleLabel("Registra Nuovo Animale");
         panel.add(titleLabel);
         panel.add(Box.createVerticalStrut(30));
-        
+
         JTextField nome = new JTextField(20);
         JTextField eta = new JTextField(20);
-        JTextField provenienza = new JTextField(20);
-        JTextField stato = new JTextField(20);
         JTextField descr = new JTextField(20);
         JComboBox<Specie> combo = new JComboBox<>(specie.toArray(new Specie[0]));
-        
+        var recinti = getController().getRecintiDisponibili();
+        JComboBox<Recinto> recintoCombo = new JComboBox<>(recinti.toArray(new Recinto[0]));
+
+        // Combo stato di salute
+        JComboBox<String> statoCombo = new JComboBox<>(new String[]{"buono", "discreto", "critico"});
+
+        // Combo provenienza con campo "altro"
+        String[] provenienze = {"Zoo", "Abbandono", "Altro parco naturale", "Sequestro", "Selvatico", "Privato", "Altro"};
+        JComboBox<String> provenienzaCombo = new JComboBox<>(provenienze);
+        JTextField provenienzaAltro = new JTextField(20);
+        provenienzaAltro.setVisible(false);
+        provenienzaAltro.setMaximumSize(new java.awt.Dimension(300, 30));
+
+        provenienzaCombo.addActionListener(e -> {
+            boolean isAltro = "Altro".equals(provenienzaCombo.getSelectedItem());
+            provenienzaAltro.setVisible(isAltro);
+            panel.revalidate();
+            panel.repaint();
+        });
+
         addLabeledField(panel, "Nome:", nome);
         addLabeledField(panel, "Età:", eta);
-        addLabeledField(panel, "Provenienza:", provenienza);
-        addLabeledField(panel, "Stato:", stato);
+        addLabeledField(panel, "Provenienza:", provenienzaCombo);
+        panel.add(provenienzaAltro);
+        panel.add(Box.createVerticalStrut(5));
+        addLabeledField(panel, "Stato:", statoCombo);
         addLabeledField(panel, "Descrizione:", descr);
         addLabeledField(panel, "Specie:", combo);
+        addLabeledField(panel, "Recinto:", recintoCombo);
         panel.add(Box.createVerticalStrut(20));
-        
+
         panel.add(createButton("Registra", () -> {
             try {
+                String provenienzaFinale = "Altro".equals(provenienzaCombo.getSelectedItem())
+                    ? provenienzaAltro.getText().trim()
+                    : (String) provenienzaCombo.getSelectedItem();
+
+                if (provenienzaFinale.isEmpty()) {
+                    genericError("Inserisci la provenienza.");
+                    return;
+                }
+
+                Recinto recintoSelezionato = (Recinto) recintoCombo.getSelectedItem();
+                if (recintoSelezionato == null) {
+                    genericError("Seleziona un recinto.");
+                    return;
+                }
                 getController().userSubmittedNuovoAnimale(
                     nome.getText(),
                     Integer.parseInt(eta.getText()),
-                    provenienza.getText(),
-                    stato.getText(),
+                    provenienzaFinale,
+                    (String) statoCombo.getSelectedItem(),
                     descr.getText(),
-                    ((Specie) combo.getSelectedItem()).id
+                    ((Specie) combo.getSelectedItem()).id,
+                    recintoSelezionato.id
                 );
+
             } catch (Exception ex) {
                 genericError("Errore nei dati inseriti.");
             }
         }));
-        
+
         panel.add(Box.createVerticalStrut(10));
         panel.add(createButton("← Annulla", () -> getController().userClickedBack()));
         panel.add(Box.createVerticalGlue());
-        
+
         JScrollPane scrollPane = new JScrollPane(panel);
         scrollPane.setBackground(BACKGROUND_COLOR);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
         outerPanel.add(scrollPane, BorderLayout.CENTER);
-        
+
         showPage("nuovoAnimale", outerPanel);
     }
     
@@ -931,38 +1188,114 @@ public final class View extends JFrame {
     public void showStatistiche(Map<String, Object> stats) {
         JPanel outerPanel = new JPanel(new BorderLayout());
         outerPanel.setBackground(BACKGROUND_COLOR);
-        JPanel panel = createCenteredPanel();
-        
-        JLabel title = createTitleLabel("Statistiche Centro");
-        panel.add(title);
-        panel.add(Box.createVerticalStrut(20));
-        
-        JPanel statsBox = new JPanel();
-        statsBox.setLayout(new BoxLayout(statsBox, BoxLayout.Y_AXIS));
-        statsBox.setBackground(Color.WHITE);
-        statsBox.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(BORDER_COLOR, 1),
-            new EmptyBorder(15, 15, 15, 15)
-        ));
-        
+
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBackground(BACKGROUND_COLOR);
+        panel.setBorder(new EmptyBorder(30, 25, 30, 25));
+
+        JLabel title = new JLabel("Statistiche Centro");
+        title.setFont(new Font("Segoe UI", Font.BOLD, 24));
+        title.setForeground(PRIMARY_COLOR);
+        title.setBorder(new EmptyBorder(0, 0, 15, 0));
+        panel.add(title, BorderLayout.NORTH);
+
+        JPanel listPanel = new JPanel();
+        listPanel.setLayout(new BoxLayout(listPanel, BoxLayout.Y_AXIS));
+        listPanel.setBackground(BACKGROUND_COLOR);
+
         for (Map.Entry<String, Object> e : stats.entrySet()) {
-            JLabel stat = new JLabel( e.getKey() + ": " + e.getValue());
-            stat.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-            stat.setForeground(TEXT_COLOR);
-            statsBox.add(stat);
-            statsBox.add(Box.createVerticalStrut(8));
+            JPanel card = new JPanel(new BorderLayout(15, 0));
+            card.setBackground(Color.WHITE);
+            card.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(BORDER_COLOR, 1),
+                new EmptyBorder(12, 20, 12, 20)
+            ));
+            card.setMaximumSize(new Dimension(Integer.MAX_VALUE, 55));
+
+            JLabel keyLabel = new JLabel(e.getKey());
+            keyLabel.setFont(new Font("Segoe UI", Font.BOLD, 13));
+            keyLabel.setForeground(TEXT_COLOR);
+
+            JLabel valLabel = new JLabel(e.getValue().toString());
+            valLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+            valLabel.setForeground(new Color(130, 140, 150));
+
+            card.add(keyLabel, BorderLayout.WEST);
+            card.add(valLabel, BorderLayout.EAST);
+
+            listPanel.add(card);
+            listPanel.add(Box.createVerticalStrut(6));
         }
-        
-        panel.add(statsBox);
-        panel.add(Box.createVerticalStrut(20));
-        panel.add(createButton("← Indietro", () -> getController().userClickedBack()));
-        panel.add(Box.createVerticalGlue());
-        
+
+        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 15));
+        bottomPanel.setBackground(BACKGROUND_COLOR);
+        bottomPanel.add(createButton("← Indietro", () -> getController().userClickedBack()));
+
+        panel.add(listPanel, BorderLayout.CENTER);
+        panel.add(bottomPanel, BorderLayout.SOUTH);
+
         JScrollPane scrollPane = new JScrollPane(panel);
         scrollPane.setBackground(BACKGROUND_COLOR);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
         outerPanel.add(scrollPane, BorderLayout.CENTER);
-        
+
         showPage("statistiche", outerPanel);
+    }
+
+    public void personalePage(List<Utente> personale) {
+        JPanel outerPanel = new JPanel(new BorderLayout());
+        outerPanel.setBackground(BACKGROUND_COLOR);
+
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBackground(BACKGROUND_COLOR);
+        panel.setBorder(new EmptyBorder(30, 25, 30, 25));
+
+        JLabel title = new JLabel("Personale");
+        title.setFont(new Font("Segoe UI", Font.BOLD, 24));
+        title.setForeground(PRIMARY_COLOR);
+        title.setBorder(new EmptyBorder(0, 0, 15, 0));
+        panel.add(title, BorderLayout.NORTH);
+
+        JPanel listPanel = new JPanel();
+        listPanel.setLayout(new BoxLayout(listPanel, BoxLayout.Y_AXIS));
+        listPanel.setBackground(BACKGROUND_COLOR);
+
+        for (Utente u : personale) {
+            JPanel card = new JPanel(new BorderLayout(15, 0));
+            card.setBackground(Color.WHITE);
+            card.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(BORDER_COLOR, 1),
+                new EmptyBorder(12, 20, 12, 20)
+            ));
+            card.setMaximumSize(new Dimension(Integer.MAX_VALUE, 55));
+
+            JLabel nomeLabel = new JLabel(u.cognome + " " + u.nome + "  —  " + u.email);
+            nomeLabel.setFont(new Font("Segoe UI", Font.BOLD, 13));
+            nomeLabel.setForeground(TEXT_COLOR);
+
+            JLabel ruoloLabel = new JLabel(u.ruolo);
+            ruoloLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+            ruoloLabel.setForeground(new Color(130, 140, 150));
+
+            card.add(nomeLabel, BorderLayout.WEST);
+            card.add(ruoloLabel, BorderLayout.EAST);
+
+            listPanel.add(card);
+            listPanel.add(Box.createVerticalStrut(6));
+        }
+
+        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 15));
+        bottomPanel.setBackground(BACKGROUND_COLOR);
+        bottomPanel.add(createButton("← Indietro", () -> getController().userClickedBack()));
+
+        panel.add(listPanel, BorderLayout.CENTER);
+        panel.add(bottomPanel, BorderLayout.SOUTH);
+
+        JScrollPane scrollPane = new JScrollPane(panel);
+        scrollPane.setBackground(BACKGROUND_COLOR);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        outerPanel.add(scrollPane, BorderLayout.CENTER);
+
+        showPage("personale", outerPanel);
     }
 }
