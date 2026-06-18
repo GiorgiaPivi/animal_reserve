@@ -368,11 +368,10 @@ public final class Controller {
         }
     }
 
-    public void adminAssignedTurno(int idUtente,
-                               LocalDate data,
-                               String fascia) {
+    public void adminAssignedTurno(int idUtente, LocalDate data, String fascia) {
         try {
-            this.model.assegnaTurno(idUtente, data, fascia);
+            this.model.insertTurno(data, fascia); 
+            this.model.assegnaTurno(idUtente, data, fascia); 
             this.view.genericMessage("Turno assegnato.");
         } catch (DAOException e) {
             this.view.genericError("Errore assegnazione turno.");

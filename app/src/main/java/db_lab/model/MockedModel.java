@@ -385,16 +385,25 @@ public final class MockedModel implements Model {
     public void insertTurno(LocalDate data, String fascia) {
         turni.add(new Turno(data, fascia));
     }
-
+    
     @Override
     public void assegnaTurno(int idUtente, LocalDate data, String fascia) {
-        turni.stream()
-            .filter(t -> t.data.equals(data) && t.fascia.equals(fascia))
-            .findFirst()
-            .ifPresent(t -> {
-                System.out.println("Turno assegnato a utente " + idUtente);
-            });
+        for (int i = 0; i < turni.size(); i++) {
+            Turno t = turni.get(i);
+            if (t.data.equals(data) && t.fascia.equals(fascia)) {
+                turnoAssegnazioni.put(i, idUtente);
+                System.out.println("Turno assegnato correttamente!");
+                return;
+            }
+        }
+
+        // Se il turno non esiste, lo creo
+        Turno nuovo = new Turno(data, fascia);
+        turni.add(nuovo);
+        turnoAssegnazioni.put(turni.size() - 1, idUtente);
+        System.out.println("Turno creato e assegnato!");
     }
+
 
     @Override
     public void insertMansione(String descrizione, String tipoMansione) {
@@ -442,12 +451,47 @@ public final class MockedModel implements Model {
 
     @Override
     public List<Utente> listStaff() {
-        return List.of();
+        return utenti.stream()
+            .filter(u -> "volontario".equalsIgnoreCase(u.ruolo) || "veterinario".equalsIgnoreCase(u.ruolo))
+            .toList();
     }
 
     @Override
     public List<String> mansioniConAssegnati() {
-        return List.of();
+        List<String> lista = new ArrayList<>();
+        for (int i = 0; i < mansioni.size(); i++) {
+            Mansione m = mansioni.get(i);
+            String mansione = m.descrizione + " (" + m.tipoMansione + ")";
+            Integer idUtenteAss = mansioneAssegnazioni.get(i);
+            String utente;
+            if (idUtenteAss == null) {
+                utente = "— non assegnata";
+            } else {
+                var u = utenti.stream().filter(x -> x.id == idUtenteAss).findFirst();
+                utente = u.map(x -> x.cognome + " " + x.nome + " (ID: " + x.id + ")").orElse("— non assegnata");
+            }
+            lista.add(mansione + "  →  " + utente);
+        }
+        return lista;
+    }
+
+    @Override
+    public List<String> turniConAssegnati() {
+        List<String> lista = new ArrayList<>();
+        for (int i = 0; i < turni.size(); i++) {
+            Turno t = turni.get(i);
+            String turno = t.data + " — " + t.fascia;
+            Integer idUtenteAss = turnoAssegnazioni.get(i);
+            String utente;
+            if (idUtenteAss == null) {
+                utente = "— non assegnato";
+            } else {
+                var u = utenti.stream().filter(x -> x.id == idUtenteAss).findFirst();
+                utente = u.map(x -> x.cognome + " " + x.nome + " (ID: " + x.id + ")").orElse("— non assegnato");
+            }
+            lista.add(turno + "  →  " + utente);
+        }
+        return lista;
     }
 
     @Override
@@ -459,8 +503,4 @@ public final class MockedModel implements Model {
         mansioneAssegnazioni.put(nextIndex, idUtente);
     }
 
-    @Override
-    public List<String> turniConAssegnati() {
-        return List.of();
-    }
 }

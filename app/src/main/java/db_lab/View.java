@@ -518,43 +518,66 @@ public final class View extends JFrame {
     public void nuovoTurnoForm() {
         JPanel outerPanel = new JPanel(new BorderLayout());
         outerPanel.setBackground(BACKGROUND_COLOR);
-        JPanel panel = createCenteredPanel();
+
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBackground(BACKGROUND_COLOR);
+        panel.setBorder(new EmptyBorder(30, 25, 30, 25));
+
+        JLabel title = new JLabel("Assegna Turno");
+        title.setFont(new Font("Segoe UI", Font.BOLD, 24));
+        title.setForeground(PRIMARY_COLOR);
+        title.setBorder(new EmptyBorder(0, 0, 15, 0));
+        panel.add(title, BorderLayout.NORTH);
+
+        JPanel form = new JPanel();
+        form.setLayout(new BoxLayout(form, BoxLayout.Y_AXIS));
+        form.setBackground(BACKGROUND_COLOR);
+
+        JComboBox<String> fasciaCombo = new JComboBox<>(new String[]{"mattina", "pomeriggio"});
         
-        JLabel titleLabel = createTitleLabel("Assegna Turno");
-        panel.add(titleLabel);
-        panel.add(Box.createVerticalStrut(30));
+        var staff = getController().getStaff();
+        JComboBox<Utente> utenteCombo = new JComboBox<>();
+        staff.stream()
+            .filter(u -> "volontario".equalsIgnoreCase(u.ruolo) || "veterinario".equalsIgnoreCase(u.ruolo))
+            .forEach(utenteCombo::addItem);
+        
         
         JSpinner dataSpinner = new JSpinner(new SpinnerDateModel());
         dataSpinner.setEditor(new JSpinner.DateEditor(dataSpinner, "dd/MM/yyyy"));
-        JComboBox<String> fasciaCombo = new JComboBox<>(new String[]{"mattina", "pomeriggio"});
-        JSpinner idUtenteSpinner = new JSpinner(new javax.swing.SpinnerNumberModel(1, 1, 1000, 1));
-        
-        addLabeledField(panel, "Data:", dataSpinner);
-        addLabeledField(panel, "Fascia:", fasciaCombo);
-        addLabeledField(panel, "ID Utente:", idUtenteSpinner);
-        panel.add(Box.createVerticalStrut(20));
-        
-        panel.add(createButton("✓ Assegna Turno", () -> {
+
+        addLabeledField(form, "Fascia Oraria:", fasciaCombo);
+        addLabeledField(form, "Assegna a:", utenteCombo);
+        addLabeledField(form, "Data:", dataSpinner);
+        form.add(Box.createVerticalStrut(20));
+
+        form.add(createButton("Assegna Turno", () -> {
             try {
+                Utente selezionato = (Utente) utenteCombo.getSelectedItem();
+                if (selezionato == null) {
+                    genericError("Seleziona un utente.");
+                    return;
+                }
+                
                 java.util.Date utilDate = (java.util.Date) dataSpinner.getValue();
                 LocalDate data = new java.sql.Date(utilDate.getTime()).toLocalDate();
                 String fascia = (String) fasciaCombo.getSelectedItem();
-                int idUtente = (int) idUtenteSpinner.getValue();
-                getController().adminAssignedTurno(idUtente, data, fascia);
+                
+                getController().adminAssignedTurno(selezionato.id, data, fascia);
             } catch (Exception ex) {
                 genericError("Errore nei dati inseriti.");
             }
         }));
-        
-        panel.add(Box.createVerticalStrut(10));
-        panel.add(createButton("← Annulla", () -> getController().userClickedBack()));
-        panel.add(Box.createVerticalGlue());
-        
+
+        form.add(Box.createVerticalStrut(10));
+        form.add(createButton("← Annulla", () -> getController().userClickedBack()));
+
+        panel.add(form, BorderLayout.CENTER);
+
         JScrollPane scrollPane = new JScrollPane(panel);
         scrollPane.setBackground(BACKGROUND_COLOR);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
         outerPanel.add(scrollPane, BorderLayout.CENTER);
-        
+
         showPage("nuovoTurno", outerPanel);
     }
 
