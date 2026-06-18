@@ -93,7 +93,7 @@ public final class Queries {
     public static final String INSERT_ANIMALE =
         """
         INSERT INTO Animale (nome_animale, eta, provenienza, stato_di_salute,
-            descrizione, data_arrivo, ID_specie, ID_recinto)
+            descrizione, data_arrivo, ID_specie, ID_recinto, sesso)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         """;
 
@@ -339,5 +339,40 @@ public final class Queries {
         SELECT ID_utente, nome, cognome, email, ruolo
         FROM Utente
         ORDER BY ruolo, cognome
+        """;
+
+        public static final String INSERT_ASSEGNAZIONE_MANSIONE =
+        """
+        INSERT INTO assegnazione_mansione (ID_utente, ID_mansione)
+        VALUES (?, (SELECT ID_mansione FROM Mansione WHERE descrizione = ? AND tipo_mansione = ? LIMIT 1))
+        """;
+
+        public static final String LIST_PERSONALE_STAFF =
+        """
+        SELECT ID_utente, nome, cognome, ruolo
+        FROM Utente
+        WHERE ruolo IN ('volontario', 'veterinario')
+        ORDER BY ruolo, cognome
+        """;
+
+        public static final String LIST_MANSIONI_CON_ASSEGNATI =
+        """
+        SELECT M.ID_mansione, M.descrizione, M.tipo_mansione,
+            U.ID_utente, U.nome, U.cognome,
+            AM.recinto
+        FROM Mansione M
+        LEFT JOIN assegnazione_mansione AM ON M.ID_mansione = AM.ID_mansione
+        LEFT JOIN Utente U ON AM.ID_utente = U.ID_utente
+        ORDER BY M.tipo_mansione, M.descrizione
+        """;
+
+        public static final String LIST_TURNI_CON_ASSEGNATI =
+        """
+        SELECT T.data, T.fascia_oraria,
+            U.ID_utente, U.nome, U.cognome
+        FROM Turno T
+        LEFT JOIN Svolgimento S ON T.data = S.data AND T.fascia_oraria = S.fascia_oraria
+        LEFT JOIN Utente U ON S.ID_utente = U.ID_utente
+        ORDER BY T.data, T.fascia_oraria
         """;
 }

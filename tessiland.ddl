@@ -63,6 +63,7 @@ CREATE TABLE Animale (
     stato_di_salute VARCHAR(50) NOT NULL CHECK(stato_di_salute IN('buono','discreto','critico')),
     descrizione TEXT,
     data_arrivo DATE NOT NULL,
+    sesso ENUM('M', 'F') NOT NULL DEFAULT 'M',
     ID_specie INT NOT NULL,
     ID_recinto INT,
     FOREIGN KEY (ID_specie) REFERENCES Specie(ID_specie) ON DELETE RESTRICT,
@@ -185,6 +186,7 @@ CREATE TABLE Svolgimento (
 CREATE TABLE assegnazione_mansione (
     ID_utente INT NOT NULL,
     ID_mansione INT NOT NULL,
+    recinto VARCHAR(100),
     PRIMARY KEY (ID_utente, ID_mansione),
     FOREIGN KEY (ID_utente) REFERENCES Utente(ID_utente) ON DELETE CASCADE,
     FOREIGN KEY (ID_mansione) REFERENCES Mansione(ID_mansione) ON DELETE CASCADE
@@ -307,20 +309,12 @@ INSERT INTO Svolgimento (ID_utente, data, fascia_oraria)
 VALUES (2, DATE_ADD(CURDATE(), INTERVAL 1 DAY), 'pomeriggio');
 
 -- Assegna Mansioni agli Utenti (assegnazione_mansione, ex Affidato)
-INSERT INTO assegnazione_mansione (ID_utente, ID_mansione) VALUES (2, 1);
-INSERT INTO assegnazione_mansione (ID_utente, ID_mansione) VALUES (2, 2);
-INSERT INTO assegnazione_mansione (ID_utente, ID_mansione) VALUES (2, 3);
-INSERT INTO assegnazione_mansione (ID_utente, ID_mansione) VALUES (1, 4);
-INSERT INTO assegnazione_mansione (ID_utente, ID_mansione) VALUES (1, 5);
-INSERT INTO assegnazione_mansione (ID_utente, ID_mansione) VALUES (1, 6);
-
--- Assegna Mansioni ai Recinti (ASSEGNATO)
-INSERT INTO Assegnato (ID_mansione, ID_recinto) VALUES (1, 1);
-INSERT INTO Assegnato (ID_mansione, ID_recinto) VALUES (1, 2);
-INSERT INTO Assegnato (ID_mansione, ID_recinto) VALUES (2, 1);
-INSERT INTO Assegnato (ID_mansione, ID_recinto) VALUES (2, 2);
-INSERT INTO Assegnato (ID_mansione, ID_recinto) VALUES (2, 3);
-INSERT INTO Assegnato (ID_mansione, ID_recinto) VALUES (3, 3);
+INSERT INTO assegnazione_mansione (ID_utente, ID_mansione, recinto) VALUES (2, 1, 'Savana (ID: 1)');
+INSERT INTO assegnazione_mansione (ID_utente, ID_mansione, recinto) VALUES (2, 2, 'Foresta (ID: 2)');
+INSERT INTO assegnazione_mansione (ID_utente, ID_mansione, recinto) VALUES (2, 3, 'Acquatico (ID: 3)');
+INSERT INTO assegnazione_mansione (ID_utente, ID_mansione, recinto) VALUES (1, 4, 'Savana (ID: 1)');
+INSERT INTO assegnazione_mansione (ID_utente, ID_mansione, recinto) VALUES (1, 5, 'Foresta (ID: 2)');
+INSERT INTO assegnazione_mansione (ID_utente, ID_mansione, recinto) VALUES (1, 6, 'Montagna (ID: 4)');
 
 -- Inserisci Controlli Sanitari
 INSERT INTO Controllo_Sanitario (data, ora, tipologia, esito, ID_animale, ID_veterinario) 

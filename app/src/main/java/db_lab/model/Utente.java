@@ -2,7 +2,6 @@ package db_lab.model;
 
 import db_lab.data.DAOException;
 import db_lab.data.DAOUtils;
-import db_lab.data.Printer;
 import db_lab.data.Queries;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -61,12 +60,7 @@ public class Utente {
 
     @Override
     public String toString() {
-        return Printer.stringify("Utente", List.of(
-            Printer.field("id", this.id),
-            Printer.field("nome", this.nome + " " + this.cognome),
-            Printer.field("email", this.email),
-            Printer.field("ruolo", this.ruolo)
-        ));
+        return cognome + " " + nome + " (id: " + id + ")";
     }
 
     public static final class DAO {
@@ -174,10 +168,41 @@ public class Utente {
                 throw new DAOException(e);
             }
         }
+
+        public static List<Utente> listStaff(Connection connection) {
+            try (var statement = DAOUtils.prepare(connection, Queries.LIST_PERSONALE_STAFF);
+                var rs = statement.executeQuery()) {
+                var lista = new ArrayList<Utente>();
+                while (rs.next()) {
+                    lista.add(new Utente(
+                        rs.getInt("ID_utente"),
+                        rs.getString("nome"),
+                        rs.getString("cognome"),
+                        "",
+                        "",
+                        rs.getString("ruolo")
+                    ));
+                }
+                return lista;
+            } catch (SQLException e) {
+                throw new DAOException(e);
+            }
+        }
     }
 
     public boolean isAdmin() {
         return !ruolo.equalsIgnoreCase("visitatore");
+    }
+
+    public static void assegnaMansione(Connection connection, int idUtente, String descrizione, String tipo) {
+        try (var stmt = connection.prepareStatement(Queries.INSERT_ASSEGNAZIONE_MANSIONE)) {
+            stmt.setInt(1, idUtente);
+            stmt.setString(2, descrizione);
+            stmt.setString(3, tipo);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new DAOException(e);
+        }
     }
 
 }

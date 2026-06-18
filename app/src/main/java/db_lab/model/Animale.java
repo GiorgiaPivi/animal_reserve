@@ -27,10 +27,11 @@ public final class Animale {
     public final int idSpecie;
     public final String nomeSpecie;
     public final Optional<Integer> idRecinto;
+    public final String sesso;
 
     public Animale(int id, String nome, int eta, String provenienza,
                    String statoDiSalute, String descrizione, LocalDate dataArrivo,
-                   int idSpecie, String nomeSpecie, Optional<Integer> idRecinto) {
+                   int idSpecie, String nomeSpecie, Optional<Integer> idRecinto, String sesso) {
         this.id = id;
         this.nome = nome == null ? "" : nome;
         this.eta = eta;
@@ -41,6 +42,7 @@ public final class Animale {
         this.idSpecie = idSpecie;
         this.nomeSpecie = nomeSpecie == null ? "" : nomeSpecie;
         this.idRecinto = idRecinto == null ? Optional.empty() : idRecinto;
+        this.sesso = sesso == null ? "M" : sesso;
     }
 
     @Override
@@ -131,7 +133,7 @@ public final class Animale {
         // OP06 - Inserisce un nuovo animale, restituisce l'ID generato
         public static int insert(Connection connection, String nome, int eta, String provenienza,
                 String statoDiSalute, String descrizione, LocalDate dataArrivo,
-                int idSpecie, Optional<Integer> idRecinto) {
+                int idSpecie, Optional<Integer> idRecinto, String sesso) {
             try (var statement = connection.prepareStatement(
                     Queries.INSERT_ANIMALE, Statement.RETURN_GENERATED_KEYS)) {
                 statement.setString(1, nome);
@@ -146,6 +148,7 @@ public final class Animale {
                 } else {
                     statement.setNull(8, Types.INTEGER);
                 }
+                statement.setString(9, sesso);
                 statement.executeUpdate();
                 try (var keys = statement.getGeneratedKeys()) {
                     if (keys.next()) return keys.getInt(1);
@@ -210,17 +213,18 @@ public final class Animale {
             int idRecinto = rs.getInt("ID_recinto");
             Optional<Integer> recinto = rs.wasNull() ? Optional.empty() : Optional.of(idRecinto);
             return new Animale(
-                rs.getInt("ID_animale"),
-                rs.getString("nome_animale"),
-                rs.getInt("eta"),
-                rs.getString("provenienza"),
-                rs.getString("stato_di_salute"),
-                rs.getString("descrizione"),
-                rs.getDate("data_arrivo").toLocalDate(),
-                rs.getInt("ID_specie"),
-                rs.getString("nome_specie"),
-                recinto
-            );
+            rs.getInt("ID_animale"),
+            rs.getString("nome_animale"),
+            rs.getInt("eta"),
+            rs.getString("provenienza"),
+            rs.getString("stato_di_salute"),
+            rs.getString("descrizione"),
+            rs.getDate("data_arrivo").toLocalDate(),
+            rs.getInt("ID_specie"),
+            rs.getString("nome_specie"),
+            recinto,
+            rs.getString("sesso")
+);
         }
 
         public static void updateRecinto(Connection connection, int idAnimale, int idRecinto) {

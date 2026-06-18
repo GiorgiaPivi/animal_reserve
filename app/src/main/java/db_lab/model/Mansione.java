@@ -67,33 +67,13 @@ public final class Mansione {
             }
         }
 
-        public static void affida(Connection connection, int idUtente, int idMansione) {
-            // Verifica che la mansione sia di tipo 'volontario'
-            try (var checkStmt = DAOUtils.prepare(connection, 
-                    "SELECT tipo_mansione FROM Mansione WHERE ID_mansione = ?", idMansione);
-                var rs = checkStmt.executeQuery()) {
-                
-                if (!rs.next()) {
-                    throw new DAOException("Mansione non trovata.");
-                }
-                
-                String tipoMansione = rs.getString("tipo_mansione");
-                if (!"volontario".equals(tipoMansione)) {
-                    throw new DAOException("Questa mansione è riservata ai veterinari.");
-                }
-            } catch (SQLException e) {
-                throw new DAOException(e);
-            }
-            
-            // Assegna la mansione al volontario
-            try (var stmt = connection.prepareStatement(Queries.INSERT_AFFIDATO)) {
+        public static void affida(Connection connection, int idUtente, int idMansione, String recinto) {
+            try (var stmt = connection.prepareStatement(
+                    "INSERT INTO assegnazione_mansione (ID_utente, ID_mansione, recinto) VALUES (?, ?, ?)")) {
                 stmt.setInt(1, idUtente);
                 stmt.setInt(2, idMansione);
-                stmt.setInt(3, idUtente);
-                int rows = stmt.executeUpdate();
-                if (rows == 0) {
-                    throw new DAOException("Operazione non consentita: l'utente non è un volontario.");
-                }
+                stmt.setString(3, recinto);
+                stmt.executeUpdate();
             } catch (SQLException e) {
                 throw new DAOException(e);
             }
@@ -133,6 +113,24 @@ public final class Mansione {
                 }
                 return mansioni;
 
+            } catch (SQLException e) {
+                throw new DAOException(e);
+            }
+        }
+
+        public static List<String> listConAssegnati(Connection connection) {
+            try (var stmt = DAOUtils.prepare(connection, Queries.LIST_MANSIONI_CON_ASSEGNATI);
+                var rs = stmt.executeQuery()) {
+                var lista = new ArrayList<String>();
+                while (rs.next()) {
+                    String mansione = rs.getString("descrizione") + " (" + rs.getString("tipo_mansione") + ")";
+                    String utente = rs.getString("nome") == null
+                        ? "— non assegnata"
+                        : rs.getString("cognome") + " " + rs.getString("nome") + " (ID: " + rs.getInt("ID_utente") + ")";
+                    String recinto = rs.getString("recinto") == null ? "" : "  |  Recinto: " + rs.getString("recinto");
+                    lista.add(mansione + "  →  " + utente + recinto);
+                }
+                return lista;
             } catch (SQLException e) {
                 throw new DAOException(e);
             }

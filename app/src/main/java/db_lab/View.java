@@ -561,46 +561,106 @@ public final class View extends JFrame {
     public void nuovaMansioneForm() {
         JPanel outerPanel = new JPanel(new BorderLayout());
         outerPanel.setBackground(BACKGROUND_COLOR);
-        JPanel panel = createCenteredPanel();
-        
-        JLabel titleLabel = createTitleLabel("Crea e Assegna Mansione");
-        panel.add(titleLabel);
-        panel.add(Box.createVerticalStrut(30));
-        
-        JTextField descrizione = new JTextField(30);
+
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBackground(BACKGROUND_COLOR);
+        panel.setBorder(new EmptyBorder(30, 25, 30, 25));
+
+        JLabel title = new JLabel("Crea e Assegna Mansione");
+        title.setFont(new Font("Segoe UI", Font.BOLD, 24));
+        title.setForeground(PRIMARY_COLOR);
+        title.setBorder(new EmptyBorder(0, 0, 15, 0));
+        panel.add(title, BorderLayout.NORTH);
+
+        JPanel form = new JPanel();
+        form.setLayout(new BoxLayout(form, BoxLayout.Y_AXIS));
+        form.setBackground(BACKGROUND_COLOR);
+
+        String[] mansioniVolontario = {"Pulizia recinto", "Distribuzione cibo e acqua", "Manutenzione recinto", "Accoglienza animali"};
+        String[] mansioniVeterinario = {"Somministrazione medicinali", "Visita animali", "Assistenza veterinaria", "Vaccinazioni"};
+
         JComboBox<String> tipoCombo = new JComboBox<>(new String[]{"volontario", "veterinario"});
-        JSpinner idVolontarioSpinner = new JSpinner(new javax.swing.SpinnerNumberModel(1, 1, 1000, 1));
-        
-        addLabeledField(panel, "Descrizione:", descrizione);
-        addLabeledField(panel, "Tipo:", tipoCombo);
-        addLabeledField(panel, "ID Volontario:", idVolontarioSpinner);
-        panel.add(Box.createVerticalStrut(20));
-        
-        panel.add(createButton("Crea e Assegna", () -> {
-            try {
-                if (descrizione.getText().isEmpty()) {
-                    genericError("La descrizione è obbligatoria.");
-                    return;
-                }
-                String tipo = (String) tipoCombo.getSelectedItem();
-                int idVolontario = (int) idVolontarioSpinner.getValue();
-                getController().adminCreatedMansione(descrizione.getText(), tipo);
-            } catch (Exception ex) {
-                genericError("Errore nei dati inseriti.");
+        JComboBox<String> descrizioneCombo = new JComboBox<>(mansioniVolontario);
+
+        tipoCombo.addActionListener(e -> {
+            descrizioneCombo.removeAllItems();
+            String[] mansioni = "volontario".equals(tipoCombo.getSelectedItem())
+                ? mansioniVolontario : mansioniVeterinario;
+            for (String m : mansioni) descrizioneCombo.addItem(m);
+        });
+
+        var staff = getController().getStaff();
+
+        // Filtra per tipo iniziale (volontario)
+        JComboBox<Utente> utenteCombo = new JComboBox<>();
+        staff.stream()
+            .filter(u -> "volontario".equalsIgnoreCase(u.ruolo))
+            .forEach(utenteCombo::addItem);
+
+        // Aggiorna il combo utenti quando cambia il tipo
+        tipoCombo.addActionListener(e -> {
+            String tipoSel = (String) tipoCombo.getSelectedItem();
+            utenteCombo.removeAllItems();
+            staff.stream()
+                .filter(u -> tipoSel.equalsIgnoreCase(u.ruolo))
+                .forEach(utenteCombo::addItem);
+        });
+
+        // Combo recinto
+        var recinti = getController().getRecintiDisponibili();
+        JComboBox<String> recintoCombo = new JComboBox<>();
+        recinti.forEach(r -> recintoCombo.addItem(r.tipologia + " (ID: " + r.id + ")"));
+        recintoCombo.addItem("Altro");
+
+        JTextField recintoAltro = new JTextField(20);
+        recintoAltro.setVisible(false);
+        recintoAltro.setMaximumSize(new Dimension(300, 30));
+
+        recintoCombo.addActionListener(e -> {
+            boolean isAltro = "Altro".equals(recintoCombo.getSelectedItem());
+            recintoAltro.setVisible(isAltro);
+            form.revalidate();
+            form.repaint();
+        });
+
+        addLabeledField(form, "Tipo:", tipoCombo);
+        addLabeledField(form, "Mansione:", descrizioneCombo);
+        addLabeledField(form, "Assegna a:", utenteCombo);
+        addLabeledField(form, "Recinto:", recintoCombo);
+        form.add(recintoAltro);
+        form.add(Box.createVerticalStrut(20));
+
+        form.add(createButton("Crea e Assegna", () -> {
+            Utente selezionato = (Utente) utenteCombo.getSelectedItem();
+            if (selezionato == null) {
+                genericError("Seleziona un utente.");
+                return;
             }
+            String tipo = (String) tipoCombo.getSelectedItem();
+            String descrizione = (String) descrizioneCombo.getSelectedItem();
+            String recintoSel = "Altro".equals(recintoCombo.getSelectedItem())
+                ? recintoAltro.getText().trim()
+                : (String) recintoCombo.getSelectedItem();
+            if (recintoSel == null || recintoSel.isEmpty()) {
+                genericError("Specifica il recinto.");
+                return;
+            }
+            getController().adminCreatedMansione(descrizione, tipo, selezionato.id, recintoSel);
         }));
-        
-        panel.add(Box.createVerticalStrut(10));
-        panel.add(createButton("← Annulla", () -> getController().userClickedBack()));
-        panel.add(Box.createVerticalGlue());
-        
+
+        form.add(Box.createVerticalStrut(10));
+        form.add(createButton("← Annulla", () -> getController().userClickedBack()));
+
+        panel.add(form, BorderLayout.CENTER);
+
         JScrollPane scrollPane = new JScrollPane(panel);
         scrollPane.setBackground(BACKGROUND_COLOR);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
         outerPanel.add(scrollPane, BorderLayout.CENTER);
-        
+
         showPage("nuovaMansione", outerPanel);
     }
+    
     public void nuovaSpecieForm() {
         JPanel outerPanel = new JPanel(new BorderLayout());
         outerPanel.setBackground(BACKGROUND_COLOR);
@@ -725,6 +785,7 @@ public final class View extends JFrame {
         addRow.accept("Età", a.eta + " anni");
         addRow.accept("Provenienza", a.provenienza);
         addRow.accept("Stato di salute", a.statoDiSalute);
+        addRow.accept("Sesso", a.sesso.equals("M") ? "Maschio" : "Femmina");
 
         if (a.idRecinto.isPresent()) {
             var recinto = getController().getRecintoAnimale(a.idRecinto.get());
@@ -968,6 +1029,7 @@ public final class View extends JFrame {
 
         // Combo stato di salute
         JComboBox<String> statoCombo = new JComboBox<>(new String[]{"buono", "discreto", "critico"});
+        JComboBox<String> sessoCombo = new JComboBox<>(new String[]{"M", "F"});
 
         // Combo provenienza con campo "altro"
         String[] provenienze = {"Zoo", "Abbandono", "Altro parco naturale", "Sequestro", "Selvatico", "Privato", "Altro"};
@@ -986,6 +1048,7 @@ public final class View extends JFrame {
         addLabeledField(panel, "Nome:", nome);
         addLabeledField(panel, "Età:", eta);
         addLabeledField(panel, "Provenienza:", provenienzaCombo);
+        addLabeledField(panel, "Sesso:", sessoCombo);
         panel.add(provenienzaAltro);
         panel.add(Box.createVerticalStrut(5));
         addLabeledField(panel, "Stato:", statoCombo);
@@ -1011,14 +1074,15 @@ public final class View extends JFrame {
                     return;
                 }
                 getController().userSubmittedNuovoAnimale(
-                    nome.getText(),
-                    Integer.parseInt(eta.getText()),
-                    provenienzaFinale,
-                    (String) statoCombo.getSelectedItem(),
-                    descr.getText(),
-                    ((Specie) combo.getSelectedItem()).id,
-                    recintoSelezionato.id
-                );
+                nome.getText(),
+                Integer.parseInt(eta.getText()),
+                provenienzaFinale,
+                (String) statoCombo.getSelectedItem(),
+                descr.getText(),
+                ((Specie) combo.getSelectedItem()).id,
+                recintoSelezionato.id,
+                (String) sessoCombo.getSelectedItem()
+            );
 
             } catch (Exception ex) {
                 genericError("Errore nei dati inseriti.");
@@ -1298,4 +1362,151 @@ public final class View extends JFrame {
 
         showPage("personale", outerPanel);
     }
+
+    public void mansioniSempliciPage(List<String> mansioni) {
+        JPanel outerPanel = new JPanel(new BorderLayout());
+        outerPanel.setBackground(BACKGROUND_COLOR);
+
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBackground(BACKGROUND_COLOR);
+        panel.setBorder(new EmptyBorder(30, 25, 30, 25));
+
+        JLabel title = new JLabel("Mansioni");
+        title.setFont(new Font("Segoe UI", Font.BOLD, 24));
+        title.setForeground(PRIMARY_COLOR);
+        title.setBorder(new EmptyBorder(0, 0, 15, 0));
+        panel.add(title, BorderLayout.NORTH);
+
+        JPanel listPanel = new JPanel();
+        listPanel.setLayout(new BoxLayout(listPanel, BoxLayout.Y_AXIS));
+        listPanel.setBackground(BACKGROUND_COLOR);
+
+        if (mansioni.isEmpty()) {
+            JPanel card = new JPanel(new BorderLayout());
+            card.setBackground(Color.WHITE);
+            card.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(BORDER_COLOR, 1),
+                new EmptyBorder(12, 20, 12, 20)
+            ));
+            card.setMaximumSize(new Dimension(Integer.MAX_VALUE, 55));
+            JLabel vuoto = new JLabel("Nessuna mansione presente.");
+            vuoto.setFont(new Font("Segoe UI", Font.ITALIC, 13));
+            vuoto.setForeground(new Color(130, 140, 150));
+            card.add(vuoto, BorderLayout.WEST);
+            listPanel.add(card);
+        } else {
+            for (String m : mansioni) {
+                String[] parti = m.split("  →  ");
+                JPanel card = new JPanel(new BorderLayout(15, 0));
+                card.setBackground(Color.WHITE);
+                card.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(BORDER_COLOR, 1),
+                    new EmptyBorder(12, 20, 12, 20)
+                ));
+                card.setMaximumSize(new Dimension(Integer.MAX_VALUE, 55));
+
+                JLabel mansioneLabel = new JLabel(parti[0]);
+                mansioneLabel.setFont(new Font("Segoe UI", Font.BOLD, 13));
+                mansioneLabel.setForeground(TEXT_COLOR);
+
+                JLabel utenteLabel = new JLabel(parti.length > 1 ? parti[1] : "");
+                utenteLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+                utenteLabel.setForeground(new Color(130, 140, 150));
+
+                card.add(mansioneLabel, BorderLayout.WEST);
+                card.add(utenteLabel, BorderLayout.EAST);
+
+                listPanel.add(card);
+                listPanel.add(Box.createVerticalStrut(6));
+            }
+        }
+
+        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 15));
+        bottomPanel.setBackground(BACKGROUND_COLOR);
+        bottomPanel.add(createButton("← Indietro", () -> getController().userClickedBack()));
+
+        panel.add(listPanel, BorderLayout.CENTER);
+        panel.add(bottomPanel, BorderLayout.SOUTH);
+
+        JScrollPane scrollPane = new JScrollPane(panel);
+        scrollPane.setBackground(BACKGROUND_COLOR);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        outerPanel.add(scrollPane, BorderLayout.CENTER);
+
+        showPage("mansioni", outerPanel);
+    }
+
+    public void turniSempliciPage(List<String> turni) {
+        JPanel outerPanel = new JPanel(new BorderLayout());
+        outerPanel.setBackground(BACKGROUND_COLOR);
+
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBackground(BACKGROUND_COLOR);
+        panel.setBorder(new EmptyBorder(30, 25, 30, 25));
+
+        JLabel title = new JLabel("Turni");
+        title.setFont(new Font("Segoe UI", Font.BOLD, 24));
+        title.setForeground(PRIMARY_COLOR);
+        title.setBorder(new EmptyBorder(0, 0, 15, 0));
+        panel.add(title, BorderLayout.NORTH);
+
+        JPanel listPanel = new JPanel();
+        listPanel.setLayout(new BoxLayout(listPanel, BoxLayout.Y_AXIS));
+        listPanel.setBackground(BACKGROUND_COLOR);
+
+        if (turni.isEmpty()) {
+            JPanel card = new JPanel(new BorderLayout());
+            card.setBackground(Color.WHITE);
+            card.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(BORDER_COLOR, 1),
+                new EmptyBorder(12, 20, 12, 20)
+            ));
+            card.setMaximumSize(new Dimension(Integer.MAX_VALUE, 55));
+            JLabel vuoto = new JLabel("Nessun turno presente.");
+            vuoto.setFont(new Font("Segoe UI", Font.ITALIC, 13));
+            vuoto.setForeground(new Color(130, 140, 150));
+            card.add(vuoto, BorderLayout.WEST);
+            listPanel.add(card);
+        } else {
+            for (String t : turni) {
+                String[] parti = t.split("  →  ");
+                JPanel card = new JPanel(new BorderLayout(15, 0));
+                card.setBackground(Color.WHITE);
+                card.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(BORDER_COLOR, 1),
+                    new EmptyBorder(12, 20, 12, 20)
+                ));
+                card.setMaximumSize(new Dimension(Integer.MAX_VALUE, 55));
+
+                JLabel turnoLabel = new JLabel(parti[0]);
+                turnoLabel.setFont(new Font("Segoe UI", Font.BOLD, 13));
+                turnoLabel.setForeground(TEXT_COLOR);
+
+                JLabel utenteLabel = new JLabel(parti.length > 1 ? parti[1] : "");
+                utenteLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+                utenteLabel.setForeground(new Color(130, 140, 150));
+
+                card.add(turnoLabel, BorderLayout.WEST);
+                card.add(utenteLabel, BorderLayout.EAST);
+
+                listPanel.add(card);
+                listPanel.add(Box.createVerticalStrut(6));
+            }
+        }
+
+        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 15));
+        bottomPanel.setBackground(BACKGROUND_COLOR);
+        bottomPanel.add(createButton("← Indietro", () -> getController().userClickedBack()));
+
+        panel.add(listPanel, BorderLayout.CENTER);
+        panel.add(bottomPanel, BorderLayout.SOUTH);
+
+        JScrollPane scrollPane = new JScrollPane(panel);
+        scrollPane.setBackground(BACKGROUND_COLOR);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        outerPanel.add(scrollPane, BorderLayout.CENTER);
+
+        showPage("turni", outerPanel);
+    }
+    
 }

@@ -186,7 +186,7 @@ public final class Controller {
     }
 
     public void userSubmittedNuovoAnimale(String nome, int eta, String provenienza,
-        String statoDiSalute, String descrizione, int idSpecie, int idRecinto) {
+        String statoDiSalute, String descrizione, int idSpecie, int idRecinto, String sesso) {
         // Validazione input
         if (nome == null || nome.trim().isEmpty()) {
             this.view.genericError("Il nome dell'animale è obbligatorio.");
@@ -203,7 +203,7 @@ public final class Controller {
         
         try {
             int id = this.model.insertAnimale(nome, eta, provenienza, statoDiSalute,
-    descrizione, LocalDate.now(), idSpecie, Optional.of(idRecinto));
+    descrizione, LocalDate.now(), idSpecie, Optional.of(idRecinto), sesso);
             this.view.animaleRegistrato(id);
             this.loadAnimaliPage();
         } catch (DAOException e) {
@@ -546,8 +546,8 @@ public final class Controller {
 
     public void userClickedTurni() {
         try {
-            var turni = this.model.turniByUtente(this.utenteCorrente.get().id);
-            this.view.turniPage(turni);
+            var turni = this.model.turniConAssegnati();
+            this.view.turniSempliciPage(turni);
         } catch (DAOException e) {
             this.view.genericError("Errore nel caricamento turni.");
         }
@@ -555,17 +555,17 @@ public final class Controller {
 
     public void userClickedMansioni() {
         try {
-            var mansioni = this.model.mansioniByUtente(this.utenteCorrente.get().id);
-            this.view.mansioniPage(mansioni, this.utenteCorrente);
+            var mansioni = this.model.mansioniConAssegnati();
+            this.view.mansioniSempliciPage(mansioni);
         } catch (DAOException e) {
             this.view.genericError("Errore nel caricamento mansioni.");
         }
-    }
+}
 
     public void adminClickedAllTurni() {
         try {
-            var turni = this.model.turni();
-            this.view.turniPage(turni);
+            var turni = this.model.turniConAssegnati();
+            this.view.turniSempliciPage(turni);
         } catch (DAOException e) {
             this.view.genericError("Errore nel caricamento turni.");
         }
@@ -573,32 +573,57 @@ public final class Controller {
 
     public void adminClickedAllMansioni() {
         try {
-            var mansioni = this.model.mansioni();
-            this.view.mansioniPage(mansioni, this.utenteCorrente);
+            var mansioni = this.model.mansioniConAssegnati();
+            this.view.mansioniSempliciPage(mansioni);
         } catch (DAOException e) {
             this.view.genericError("Errore nel caricamento mansioni.");
         }
-    }
-    public void userRequestedNuovoTurno() {
-        this.view.nuovoTurnoForm();
     }
 
     public void userRequestedNuovaMansione() {
         this.view.nuovaMansioneForm();
     }
 
+    public void userRequestedNuovoTurno() {
+        this.view.nuovoTurnoForm();
+    }
+
     public void userRequestedNuovaSpecie() {
         this.view.nuovaSpecieForm();
     }
 
-    public void adminCreatedMansione(String descrizione, String tipoMansione) {
+    public void adminCreatedMansione(String descrizione, String tipoMansione, int idUtente, String recinto) {
         try {
-            this.model.insertMansione(descrizione, tipoMansione);
-            this.view.genericMessage("Mansione creata.");
+            var mansioniEsistenti = this.model.mansioni();
+            var mansioneEsistente = mansioniEsistenti.stream()
+                .filter(m -> m.descrizione.equals(descrizione) && m.tipoMansione.equals(tipoMansione))
+                .findFirst();
+
+            int idMansione;
+            if (mansioneEsistente.isPresent()) {
+                idMansione = mansioneEsistente.get().id;
+            } else {
+                this.model.insertMansione(descrizione, tipoMansione);
+                idMansione = this.model.mansioni().stream()
+                    .filter(m -> m.descrizione.equals(descrizione) && m.tipoMansione.equals(tipoMansione))
+                    .reduce((first, second) -> second)
+                    .orElseThrow().id;
+            }
+
+            var mansioniUtente = this.model.mansioniByUtente(idUtente);
+            boolean giàAssegnata = mansioniUtente.stream().anyMatch(m -> m.id == idMansione);
+            if (giàAssegnata) {
+                this.view.genericMessage("Questa mansione è già assegnata a questo utente.");
+                return;
+            }
+
+            this.model.affidaMansione(idUtente, idMansione, recinto);
+            this.view.genericMessage("Mansione assegnata.");
         } catch (DAOException e) {
-            this.view.genericError("Errore creazione mansione.");
+            this.view.genericError("Errore creazione mansione: " + e.getMessage());
         }
     }
+
     public void userRequestedNuovoPersonale() {
         this.view.nuovoPersonaleForm();
     }
@@ -637,8 +662,12 @@ public final class Controller {
         }
         
         try {
-            this.model.registraConRuolo(nome, cognome, email, password, ruolo);
-            this.view.genericMessage("Personale creato con successo.");
+            var utente = this.model.registraConRuolo(nome, cognome, email, password, ruolo);
+            if (utente.isPresent()) {
+                this.view.genericMessage("Personale creato. ID: " + utente.get().id);
+            } else {
+                this.view.genericError("Errore nella creazione del personale.");
+            }
             this.loadAnimaliPage();
         } catch (DAOException e) {
             this.view.genericError("Errore nella creazione del personale: " + e.getMessage());
@@ -667,6 +696,14 @@ public final class Controller {
             this.view.personalePage(personale);
         } catch (DAOException e) {
             this.view.genericError("Errore nel caricamento personale.");
+        }
+    }
+
+    public List<Utente> getStaff() {
+        try {
+            return this.model.listStaff();
+        } catch (Exception e) {
+            return List.of();
         }
     }
 }

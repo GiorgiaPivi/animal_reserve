@@ -82,9 +82,9 @@ public final class DBModel implements Model {
     @Override
     public int insertAnimale(String nome, int eta, String provenienza, String statoDiSalute,
                              String descrizione, LocalDate dataArrivo, int idSpecie,
-                             Optional<Integer> idRecinto) {
+                             Optional<Integer> idRecinto, String sesso) {
         return Animale.DAO.insert(connection, nome, eta, provenienza, statoDiSalute,
-            descrizione, dataArrivo, idSpecie, idRecinto);
+            descrizione, dataArrivo, idSpecie, idRecinto, sesso);
     }
 
     @Override
@@ -246,11 +246,6 @@ public final class DBModel implements Model {
     }
 
     @Override
-    public void affidaMansione(int idUtente, int idMansione) {
-        Mansione.DAO.affida(connection, idUtente, idMansione);
-    }
-
-    @Override
     public List<Turno> turni() {
         return Turno.DAO.list(connection);
     }
@@ -283,5 +278,25 @@ public final class DBModel implements Model {
     @Override
     public List<Utente> listPersonale() {
         return Utente.DAO.listAll(connection);
+    }
+
+    @Override
+    public List<Utente> listStaff() {
+        return Utente.DAO.listStaff(connection);
+    }
+
+    @Override
+    public List<String> mansioniConAssegnati() {
+        return Mansione.DAO.listConAssegnati(connection);
+    }
+
+    @Override
+    public void affidaMansione(int idUtente, int idMansione, String recinto) {
+        Mansione.DAO.affida(connection, idUtente, idMansione, recinto);
+    }
+
+    @Override
+    public List<String> turniConAssegnati() {
+        return Turno.DAO.listConAssegnati(connection);
     }
 }

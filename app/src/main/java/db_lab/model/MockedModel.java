@@ -46,15 +46,15 @@ public final class MockedModel implements Model {
 
         this.animali = new ArrayList<>();
         animali.add(new Animale(1, "Simba", 5, "Kenya", "buono", "Leone africano maschio",
-            LocalDate.of(2021, 3, 10), 1, "Leone", Optional.of(1)));
+            LocalDate.of(2021, 3, 10), 1, "Leone", Optional.of(1), "M"));
         animali.add(new Animale(2, "Dumbo", 12, "India", "discreto", "Elefante asiatico femmina",
-            LocalDate.of(2019, 7, 22), 2, "Elefante", Optional.of(2)));
+            LocalDate.of(2019, 7, 22), 2, "Elefante", Optional.of(2), "F"));
         animali.add(new Animale(3, "Pingo", 3, "Antartide", "critico", "Pinguino imperatore giovane",
-            LocalDate.of(2023, 1, 5), 3, "Pinguino", Optional.empty()));
+            LocalDate.of(2023, 1, 5), 3, "Pinguino", Optional.empty(), "M"));
         animali.add(new Animale(4, "Mufasa", 10, "Kenya", "critico", "Leone anziano in recupero",
-            LocalDate.of(2020, 11, 20), 1, "Leone", Optional.of(1)));
+            LocalDate.of(2020, 11, 20), 1, "Leone", Optional.of(1), "M"));
         animali.add(new Animale(5, "Nala", 7, "Tanzania", "critico", "Leonessa con infezione",
-            LocalDate.of(2021, 5, 15), 1, "Leone", Optional.of(2)));
+            LocalDate.of(2021, 5, 15), 1, "Leone", Optional.of(2), "F"));
 
         this.controlli = new ArrayList<>();
         this.terapie = new ArrayList<>();
@@ -174,13 +174,13 @@ public final class MockedModel implements Model {
     @Override
     public int insertAnimale(String nome, int eta, String provenienza, String statoDiSalute,
                              String descrizione, LocalDate dataArrivo, int idSpecie,
-                             Optional<Integer> idRecinto) {
+                             Optional<Integer> idRecinto, String sesso) {
         int id = ++nextId;
         String nomeSpecie = specie.stream()
             .filter(s -> s.id == idSpecie).findFirst()
             .map(s -> s.nome).orElse("?");
         animali.add(new Animale(id, nome, eta, provenienza, statoDiSalute,
-            descrizione, dataArrivo, idSpecie, nomeSpecie, idRecinto));
+            descrizione, dataArrivo, idSpecie, nomeSpecie, idRecinto, sesso));
         return id;
     }
 
@@ -190,7 +190,7 @@ public final class MockedModel implements Model {
             animali.remove(old);
             animali.add(new Animale(old.id, old.nome, old.eta, old.provenienza,
                 nuovoStato, old.descrizione, old.dataArrivo,
-                old.idSpecie, old.nomeSpecie, old.idRecinto));
+                old.idSpecie, old.nomeSpecie, old.idRecinto, old.sesso));
         });
     }
 
@@ -403,15 +403,6 @@ public final class MockedModel implements Model {
     }
 
     @Override
-    public void affidaMansione(int idUtente, int idMansione) {
-        int nextIndex = mansioneAssegnazioni.keySet().stream()
-            .mapToInt(Integer::intValue)
-            .max()
-            .orElse(-1) + 1;
-        mansioneAssegnazioni.put(nextIndex, idUtente);
-    }
-
-    @Override
     public List<Turno> turni() {
         return List.copyOf(turni);
     }
@@ -446,6 +437,30 @@ public final class MockedModel implements Model {
 
     @Override
     public List<Utente> listPersonale() {
+        return List.of();
+    }
+
+    @Override
+    public List<Utente> listStaff() {
+        return List.of();
+    }
+
+    @Override
+    public List<String> mansioniConAssegnati() {
+        return List.of();
+    }
+
+    @Override
+    public void affidaMansione(int idUtente, int idMansione, String recinto) {
+        int nextIndex = mansioneAssegnazioni.keySet().stream()
+            .mapToInt(Integer::intValue)
+            .max()
+            .orElse(-1) + 1;
+        mansioneAssegnazioni.put(nextIndex, idUtente);
+    }
+
+    @Override
+    public List<String> turniConAssegnati() {
         return List.of();
     }
 }

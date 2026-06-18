@@ -18,6 +18,8 @@ public interface Model {
 
     List<Utente> listPersonale();
 
+    List<Utente> listStaff();
+
     // ------- Specie -------
 
     List<Specie> specie();
@@ -40,7 +42,7 @@ public interface Model {
 
     int insertAnimale(String nome, int eta, String provenienza, String statoDiSalute,
                       String descrizione, LocalDate dataArrivo, int idSpecie,
-                      Optional<Integer> idRecinto);
+                      Optional<Integer> idRecinto, String sesso);
 
     void updateStatoAnimale(int id, String nuovoStato);
 
@@ -113,8 +115,6 @@ public interface Model {
 
     void insertMansione(String descrizione, String tipoMansione);
 
-    void affidaMansione(int idUtente, int idMansione);
-
     // ------- Factory -------
 
     static Model fromConnection(Connection connection) {
@@ -127,10 +127,19 @@ public interface Model {
 
     // ------ Turni -------
     List<Turno> turni();
+
     List<Turno> turniByUtente(int idUtente);
+
+    List<String> turniConAssegnati();
+
 
     // ----- Mansioni -----
     List<Mansione> mansioni();
+
     List<Mansione> mansioniByUtente(int idUtente);
+
+    List<String> mansioniConAssegnati();
+
+    void affidaMansione(int idUtente, int idMansione, String recinto);
 
 }

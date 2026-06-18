@@ -2,7 +2,6 @@ package db_lab.model;
 
 import db_lab.data.DAOException;
 import db_lab.data.DAOUtils;
-import db_lab.data.Printer;
 import db_lab.data.Queries;
 import java.sql.Connection;
 import java.sql.SQLException;

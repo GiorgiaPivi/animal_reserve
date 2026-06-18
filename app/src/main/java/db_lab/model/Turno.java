@@ -113,5 +113,22 @@ public final class Turno {
                 throw new DAOException(e);
             }
         }
+
+        public static List<String> listConAssegnati(Connection connection) {
+            try (var stmt = DAOUtils.prepare(connection, Queries.LIST_TURNI_CON_ASSEGNATI);
+                var rs = stmt.executeQuery()) {
+                var lista = new ArrayList<String>();
+                while (rs.next()) {
+                    String turno = rs.getDate("data") + " — " + rs.getString("fascia_oraria");
+                    String utente = rs.getString("nome") == null
+                        ? "— non assegnato"
+                        : rs.getString("cognome") + " " + rs.getString("nome") + " (ID: " + rs.getInt("ID_utente") + ")";
+                    lista.add(turno + "  →  " + utente);
+                }
+                return lista;
+            } catch (SQLException e) {
+                throw new DAOException(e);
+            }
+        }
     }
 }
