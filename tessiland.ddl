@@ -126,16 +126,10 @@ CREATE TABLE Terapia (
     FOREIGN KEY (ID_controllo) REFERENCES Controllo_Sanitario(ID_controllo) ON DELETE CASCADE
 );
 
--- =====================================================
--- TABELLA: MOVIMENTAZIONE
--- FIX: rinominata da 'Movimentazione_Animale' a 'Movimentazione'
---      rinominata 'data_spostamento' -> 'data_movimentazione'
---      'motivazione' resa opzionale (non usata nell'INSERT Java)
--- =====================================================
 CREATE TABLE Movimentazione (
     ID_movimentazione INT PRIMARY KEY AUTO_INCREMENT,
-    data_movimentazione DATE NOT NULL,   -- era 'data_spostamento'
-    motivazione VARCHAR(255),            -- resa nullable: l'INSERT Java non la valorizza
+    data_movimentazione DATE NOT NULL,
+    motivazione VARCHAR(255),
     ID_animale INT NOT NULL,
     ID_recinto_destinazione INT NOT NULL,
     ID_recinto_provenienza INT,
@@ -144,31 +138,17 @@ CREATE TABLE Movimentazione (
     FOREIGN KEY (ID_recinto_provenienza) REFERENCES Recinto(ID_recinto) ON DELETE SET NULL
 );
 
--- =====================================================
--- TABELLA: TRASPORTO_ESTERNO
--- FIX: rinominata 'data' -> 'data_trasporto'
---      aggiunta colonna 'ID_volontario' (FK verso Utente)
--- =====================================================
 CREATE TABLE Trasporto_Esterno (
     ID_trasporto INT PRIMARY KEY AUTO_INCREMENT,
     destinazione VARCHAR(150) NOT NULL,
-    data_trasporto DATE NOT NULL,        -- era 'data'
+    data_trasporto DATE NOT NULL,
     motivazione VARCHAR(255) NOT NULL,
-    mezzo_di_trasporto VARCHAR(50) NOT NULL CHECK(mezzo_di_trasporto IN(
-        'ambulanza veterinaria',
-        'furgone',
-        'auto privata',
-        'altro'
-    )),
     ID_animale INT NOT NULL,
-    ID_volontario INT,                   -- colonna mancante, usata da INSERT/LIST Java
+    ID_volontario INT,
     FOREIGN KEY (ID_animale) REFERENCES Animale(ID_animale) ON DELETE CASCADE,
     FOREIGN KEY (ID_volontario) REFERENCES Utente(ID_utente) ON DELETE SET NULL
 );
 
--- =====================================================
--- TABELLA: SVOLGIMENTO (Relazione Utente-Turno)
--- =====================================================
 CREATE TABLE Svolgimento (
     ID_utente INT NOT NULL,
     data DATE NOT NULL,
@@ -360,7 +340,3 @@ VALUES ('Ospedale Animali Specializzato', DATE_SUB(CURDATE(), INTERVAL 15 DAY), 
 INSERT INTO Previsione (ID_trasporto, ID_mansione) VALUES (1, 3);
 INSERT INTO Previsione (ID_trasporto, ID_mansione) VALUES (1, 2);
 INSERT INTO Previsione (ID_trasporto, ID_mansione) VALUES (2, 3);
-
--- =====================================================
--- FINE DATI
--- =====================================================

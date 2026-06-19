@@ -2,6 +2,7 @@ package db_lab;
 
 import db_lab.data.DAOException;
 import db_lab.model.Animale;
+import db_lab.model.ControlloSanitario;
 import db_lab.model.Model;
 import db_lab.model.Recinto;
 import db_lab.model.Utente;
@@ -686,6 +687,14 @@ public final class Controller {
             return this.model.findRecinto(idRecinto);
         } catch (Exception e) {
             return Optional.empty();
+        }
+    }
+
+    public List<ControlloSanitario> getStoricoControlliAnimale(int idAnimale) {
+        try {
+            return this.model.storicoControlli(idAnimale);
+        } catch (Exception e) {
+            return List.of();
         }
     }
 

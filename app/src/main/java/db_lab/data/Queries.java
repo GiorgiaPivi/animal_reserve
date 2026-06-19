@@ -2,7 +2,7 @@ package db_lab.data;
 
 public final class Queries {
 
-    // ------- Utente -------
+    // UTENTE
 
     public static final String FIND_UTENTE_BY_CREDENTIALS =
         """
@@ -20,7 +20,7 @@ public final class Queries {
         SELECT * FROM Utente ORDER BY cognome, nome
         """;
 
-    // ------- Specie -------
+    // SPECIE
 
     public static final String LIST_SPECIE =
         """
@@ -34,7 +34,8 @@ public final class Queries {
 
     public static final String INSERT_SPECIE =
         "INSERT INTO SPECIE (nome_specie) VALUES (?)";
-    // ------- Recinto -------
+
+    // RECINTO
 
     public static final String LIST_RECINTI =
         """
@@ -54,7 +55,7 @@ public final class Queries {
         UPDATE Animale SET ID_recinto = ? WHERE ID_animale = ?
         """;
 
-    // ------- Animale -------
+    // ANIMALE
 
     public static final String LIST_ANIMALI =
         """
@@ -114,7 +115,7 @@ public final class Queries {
         ORDER BY ultimo_controllo ASC
         """;
 
-    // ------- Controllo Sanitario -------
+    // CONTROLLO SANITARIO
 
     public static final String INSERT_CONTROLLO =
         """
@@ -132,7 +133,7 @@ public final class Queries {
         ORDER BY CS.data DESC, CS.ora DESC
         """;
 
-    // ------- Terapia -------
+    // TERAPIA
 
     public static final String INSERT_TERAPIA =
         """
@@ -161,7 +162,7 @@ public final class Queries {
         WHERE ID_terapia = ?
         """;
 
-    // ------- Movimentazione -------
+    // MOVIMENTAZIONE
 
     public static final String INSERT_MOVIMENTAZIONE =
         """
@@ -197,7 +198,7 @@ public final class Queries {
         ORDER BY R.tipo_recinto, R.ID_recinto
         """;
 
-    // ------- Trasporto Esterno -------
+    // TRASPORTO ESTERNO
 
     public static final String INSERT_TRASPORTO =
         """
@@ -224,7 +225,7 @@ public final class Queries {
         ORDER BY TE.data_trasporto DESC
         """;
 
-    // ------- Statistiche / Dashboard -------
+    // STATISTICHE
 
     public static final String CONTA_ANIMALI_TOTALI =
         """
@@ -274,7 +275,7 @@ public final class Queries {
         ORDER BY R.ID_recinto
         """;
 
-    // ------- Dettaglio Controllo -------
+    // DETTAGLIO CONTROLLO
 
     public static final String FIND_CONTROLLO =
         """
@@ -285,7 +286,8 @@ public final class Queries {
         WHERE CS.ID_controllo = ?
         """;
 
-    // ------- Turno -------
+    // TURNO
+
     public static final String INSERT_TURNO =
     "INSERT INTO TURNO (data, fascia_oraria) VALUES (?, ?)";
 
@@ -304,7 +306,8 @@ public final class Queries {
     "JOIN svolgimento s ON t.data = s.data AND t.fascia_oraria = s.fascia_oraria " +
     "WHERE s.id_utente = ?";
     
-    // ------- Mansioni -------
+    // MANSIONI
+    
     public static final String INSERT_MANSIONE =
     "INSERT INTO MANSIONE (descrizione, tipo_mansione) VALUES (?, ?)";
 

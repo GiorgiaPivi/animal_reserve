@@ -821,7 +821,6 @@ public final class View extends JFrame {
         }
 
         addRow.accept("Data arrivo", a.dataArrivo.toString());
-        addRow.accept("Descrizione", a.descrizione == null || a.descrizione.isEmpty() ? "—" : a.descrizione);
 
         panel.add(infoBox);
         panel.add(Box.createVerticalStrut(25));
@@ -877,6 +876,72 @@ public final class View extends JFrame {
             sectionVet.add(btnRow);
 
             panel.add(sectionVet);
+            panel.add(Box.createVerticalStrut(25));
+
+            JPanel sectionTerapia = new JPanel();
+            sectionTerapia.setLayout(new BoxLayout(sectionTerapia, BoxLayout.Y_AXIS));
+            sectionTerapia.setBackground(Color.WHITE);
+            sectionTerapia.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(BORDER_COLOR, 1),
+                new EmptyBorder(20, 25, 20, 25)
+            ));
+
+            sectionTerapia.add(createSubtitleLabel("Prescrivi Terapia"));
+            sectionTerapia.add(Box.createVerticalStrut(15));
+
+            JTextField farmacoField = new JTextField(15);
+            JTextField dosaggioField = new JTextField(10);
+            JSpinner giorniSpinner = new JSpinner(new SpinnerNumberModel(7, 1, 365, 1));
+
+            JPanel farmacoRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 5));
+            farmacoRow.setBackground(Color.WHITE);
+            JLabel farmacoLabel = new JLabel("Farmaco:   ");
+            farmacoLabel.setFont(new Font("Segoe UI", Font.BOLD, 12));
+            farmacoRow.add(farmacoLabel);
+            farmacoRow.add(farmacoField);
+            sectionTerapia.add(farmacoRow);
+
+            JPanel dosaggioRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 5));
+            dosaggioRow.setBackground(Color.WHITE);
+            JLabel dosaggioLabel = new JLabel("Dosaggio:  ");
+            dosaggioLabel.setFont(new Font("Segoe UI", Font.BOLD, 12));
+            dosaggioRow.add(dosaggioLabel);
+            dosaggioRow.add(dosaggioField);
+            sectionTerapia.add(dosaggioRow);
+
+            JPanel giorniRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 5));
+            giorniRow.setBackground(Color.WHITE);
+            JLabel giorniLabel = new JLabel("Durata (gg): ");
+            giorniLabel.setFont(new Font("Segoe UI", Font.BOLD, 12));
+            giorniRow.add(giorniLabel);
+            giorniRow.add(giorniSpinner);
+            sectionTerapia.add(giorniRow);
+
+            sectionTerapia.add(Box.createVerticalStrut(15));
+
+            JPanel btnTerapia = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
+            btnTerapia.setBackground(Color.WHITE);
+            btnTerapia.add(createButton("Prescrivi terapia", () -> {
+                String farmaco = farmacoField.getText().trim();
+                String dosaggio = dosaggioField.getText().trim();
+                int giorni = (Integer) giorniSpinner.getValue();
+                if (farmaco.isEmpty() || dosaggio.isEmpty()) {
+                    genericError("Inserire farmaco e dosaggio.");
+                    return;
+                }
+                var controlli = getController().getStoricoControlliAnimale(a.id);
+                if (controlli.isEmpty()) {
+                    genericError("Nessun controllo sanitario disponibile per questo animale.");
+                    return;
+                }
+                int idControllo = controlli.get(controlli.size() - 1).id;
+                getController().userSubmittedTerapia(farmaco, dosaggio, giorni, idControllo);
+            }));
+            btnTerapia.add(createButton("Storico terapie", () ->
+                getController().userClickedTerapieAnimale(a.id)));
+            sectionTerapia.add(btnTerapia);
+
+            panel.add(sectionTerapia);
             panel.add(Box.createVerticalStrut(25));
         }
 
@@ -1075,7 +1140,6 @@ public final class View extends JFrame {
         panel.add(provenienzaAltro);
         panel.add(Box.createVerticalStrut(5));
         addLabeledField(panel, "Stato:", statoCombo);
-        addLabeledField(panel, "Descrizione:", descr);
         addLabeledField(panel, "Specie:", combo);
         addLabeledField(panel, "Recinto:", recintoCombo);
         panel.add(Box.createVerticalStrut(20));
