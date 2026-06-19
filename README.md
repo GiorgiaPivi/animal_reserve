@@ -4,3 +4,24 @@ Il sistema permette di registrare e mantenere informazioni anagrafiche e sanitar
 Per quanto riguarda i controlli sanitari, il database memorizza tutti gli accertamenti periodici effettuati dal personale veterinario, registrando la data, l'orario, la tipologia di visita e l'esito clinico. Ciascun controllo è associato a un veterinario responsabile e può includere prescrizioni terapeutiche e cure aggiuntive necessarie per il benessere dell'animale, creando una cronologia completa della storia clinica.
 Il personale del centro è organizzato in due categorie principali: volontari e veterinari, ognuno con ruoli e responsabilità specifici. Il sistema registra i dati identificativi di ogni operatore e gestisce i turni settimanali di lavoro. I volontari svolgono mansioni quotidiane come pulizia, alimentazione e manutenzione dei recinti, mentre i veterinari sono responsabili esclusivamente dei controlli sanitari e delle prescrizioni cliniche. Il sistema mantiene inoltre l'elenco delle specie ospitate nel centro e organizza la struttura attorno ai recinti disponibili.
 La progettazione del database rispetta le linee guida nazionali sui requisiti minimi delle strutture veterinarie e le normative regionali sul benessere animale, garantendo la tracciabilità completa di controlli sanitari, trattamenti, movimentazioni degli animali e attività svolte dal personale.
+
+
+------------------------------------
+|           CREDENZIALI            |
+------------------------------------
+|   Accesso da admin:              |
+|   email       admin@zoo.it       |
+|   password    pass               |
+------------------------------------
+|   Accesso da volontario:         |
+|   email       volontario@zoo.it  |
+|   password    pass               |
+------------------------------------
+|   Accesso da veterinario:        |
+|   email       veterinario@zoo.it |
+|   password    pass               |
+------------------------------------
+|   Accesso da visitatore:         |
+|   email       visitatore@zoo.it  |
+|   password    pass               |
+------------------------------------

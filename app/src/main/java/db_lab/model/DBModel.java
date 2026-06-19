@@ -7,9 +7,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-// Implementazione reale del Model: usa i DAO per caricare i dati dal database.
-// Mantiene una cache della lista animali caricata più di recente.
-//
+// Implementazione reale del Model
+// Usa i DAO per caricare i dati dal database.
 public final class DBModel implements Model {
 
     private final Connection connection;
@@ -21,7 +20,7 @@ public final class DBModel implements Model {
         this.animali = Optional.empty();
     }
 
-    // ------- Utente -------
+    //Utente
 
     @Override
     public Optional<Utente> login(String email, String password) {
@@ -33,7 +32,7 @@ public final class DBModel implements Model {
         return Utente.DAO.registra(connection, nome, cognome, email, password);
     }
 
-    // ------- Specie -------
+    //Specie
 
     @Override
     public List<Specie> specie() {
@@ -45,7 +44,7 @@ public final class DBModel implements Model {
         return Specie.DAO.contaAnimali(connection, idSpecie);
     }
 
-    // ------- Animale -------
+    //Animale
 
     @Override
     public List<Animale> animali() {
@@ -97,7 +96,7 @@ public final class DBModel implements Model {
         return Animale.DAO.daControllare(connection);
     }
 
-    // ------- Controllo Sanitario -------
+    //Controllo Sanitario 
 
     @Override
     public int insertControllo(LocalDate data, LocalTime ora, String tipologia,
@@ -111,7 +110,7 @@ public final class DBModel implements Model {
         return ControlloSanitario.DAO.storicoByAnimale(connection, idAnimale);
     }
 
-    // ------- Terapia -------
+    //Terapia 
 
     @Override
     public int insertTerapia(String farmaco, String dosaggio, String durata,
@@ -130,7 +129,7 @@ public final class DBModel implements Model {
         return Terapia.DAO.listByControllo(connection, idControllo);
     }
 
-    // ------- Recinto -------
+    //Recinto 
 
     @Override
     public List<Recinto> recinti() {
@@ -152,7 +151,7 @@ public final class DBModel implements Model {
         return Recinto.DAO.contaAnimali(connection, idRecinto);
     }
 
-    // ------- Movimentazione -------
+    //Movimentazione 
 
     @Override
     public int insertMovimentazione(LocalDate dataMovimentazione, int idAnimale, int idRecintoDestinazione) {
@@ -164,7 +163,7 @@ public final class DBModel implements Model {
         return Movimentazione.DAO.listByAnimale(connection, idAnimale);
     }
 
-    // ------- Trasporto Esterno -------
+    //Trasporto Esterno 
 
     @Override
     public int insertTrasporto(LocalDate dataTrasporto, String destinazione, String motivazione,
@@ -183,7 +182,7 @@ public final class DBModel implements Model {
         return TrasportoEsterno.DAO.listAll(connection);
     }
 
-    // ------- Statistiche -------
+    //Statistiche 
 
     @Override
     public int contaAnimaliTotali() {

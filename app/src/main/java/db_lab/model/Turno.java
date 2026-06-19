@@ -46,11 +46,8 @@ public final class Turno {
         ));
     }
 
-    // ---------------- DAO ----------------
-
     public static final class DAO {
 
-        /** Inserisce un nuovo turno (data + fascia) */
         public static void insert(Connection connection, LocalDate data, String fascia) {
             try (var stmt = connection.prepareStatement(Queries.INSERT_TURNO)) {
                 stmt.setDate(1, Date.valueOf(data));
@@ -61,14 +58,12 @@ public final class Turno {
             }
         }
 
-        /** Assegna un turno a un utente (relazione SVOLGIMENTO).
-         *  La query verifica che l'utente sia volontario o veterinario prima di inserire. */
         public static void assegna(Connection connection, int idUtente, LocalDate data, String fascia) {
             try (var stmt = connection.prepareStatement(Queries.ASSIGN_TURNO)) {
                 stmt.setInt(1, idUtente);
                 stmt.setDate(2, Date.valueOf(data));
                 stmt.setString(3, fascia);
-                stmt.setInt(4, idUtente); // usato nel WHERE per il controllo ruolo
+                stmt.setInt(4, idUtente); 
                 int rows = stmt.executeUpdate();
                 if (rows == 0) {
                     throw new DAOException("Operazione non consentita: l'utente non è personale del centro.");
@@ -78,7 +73,6 @@ public final class Turno {
             }
         }
 
-        /** Lista tutti i turni presenti nel sistema */
         public static List<Turno> list(Connection connection) {
             try (var stmt = DAOUtils.prepare(connection, Queries.LIST_TURNI);
                  var rs = stmt.executeQuery()) {

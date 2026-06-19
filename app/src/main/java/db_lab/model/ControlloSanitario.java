@@ -76,7 +76,7 @@ public final class ControlloSanitario {
                 statement.setString(4, esito);
                 statement.setInt(5, idAnimale);
                 statement.setInt(6, idVeterinario);
-                statement.setInt(7, idVeterinario); // usato nel WHERE per il controllo ruolo
+                statement.setInt(7, idVeterinario);
                 int rows = statement.executeUpdate();
                 if (rows == 0) {
                     throw new DAOException("Operazione non consentita: l'utente non è un veterinario.");
@@ -112,7 +112,7 @@ public final class ControlloSanitario {
             }
         }
 
-        // Statistiche - conta controlli ultimi 30 giorni
+        // Statistiche, conta controlli ultimi 30 giorni
         public static int contaUltimi30Giorni(Connection connection) {
             try (var statement = DAOUtils.prepare(connection, Queries.CONTA_CONTROLLI_ULTIMI_30_GIORNI);
                  var rs = statement.executeQuery()) {

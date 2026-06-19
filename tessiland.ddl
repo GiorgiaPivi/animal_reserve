@@ -1,18 +1,12 @@
--- =====================================================
--- SCHEMA DATABASE: Centro Recupero Animali
--- =====================================================
-
--- Crea il database se non esiste
 CREATE DATABASE IF NOT EXISTS animal_reserve CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE animal_reserve;
 
--- Elimina tabelle esistenti (in ordine per rispettare i vincoli)
 DROP TABLE IF EXISTS Previsione;
 DROP TABLE IF EXISTS Assegnato;
-DROP TABLE IF EXISTS assegnazione_mansione;  -- rinominata da Affidato
+DROP TABLE IF EXISTS assegnazione_mansione; 
 DROP TABLE IF EXISTS Svolgimento;
 DROP TABLE IF EXISTS Trasporto_Esterno;
-DROP TABLE IF EXISTS Movimentazione;          -- rinominata da Movimentazione_Animale
+DROP TABLE IF EXISTS Movimentazione;    
 DROP TABLE IF EXISTS Terapia;
 DROP TABLE IF EXISTS Controllo_Sanitario;
 DROP TABLE IF EXISTS Turno;
@@ -22,9 +16,6 @@ DROP TABLE IF EXISTS Specie;
 DROP TABLE IF EXISTS Recinto;
 DROP TABLE IF EXISTS Utente;
 
--- =====================================================
--- TABELLA: UTENTE
--- =====================================================
 CREATE TABLE Utente (
     ID_utente INT PRIMARY KEY AUTO_INCREMENT,
     nome VARCHAR(50) NOT NULL,
@@ -34,27 +25,17 @@ CREATE TABLE Utente (
     ruolo VARCHAR(20) NOT NULL CHECK(ruolo IN('visitatore','volontario', 'veterinario','admin'))
 );
 
--- =====================================================
--- TABELLA: SPECIE
--- =====================================================
 CREATE TABLE Specie (
     ID_specie INT PRIMARY KEY AUTO_INCREMENT,
     nome_specie VARCHAR(50) NOT NULL UNIQUE
 );
 
--- =====================================================
--- TABELLA: RECINTO
--- FIX: rinominata 'tipologia' -> 'tipo_recinto'; aggiunta colonna 'capienza'
--- =====================================================
 CREATE TABLE Recinto (
     ID_recinto INT PRIMARY KEY AUTO_INCREMENT,
-    tipo_recinto VARCHAR(50) NOT NULL,   -- era 'tipologia'
-    capienza INT NOT NULL DEFAULT 10     -- colonna mancante, usata da RECINTI_DISPONIBILI e RECINTI_OCCUPAZIONE
+    tipo_recinto VARCHAR(50) NOT NULL,   
+    capienza INT NOT NULL DEFAULT 10    
 );
 
--- =====================================================
--- TABELLA: ANIMALE
--- =====================================================
 CREATE TABLE Animale (
     ID_animale INT PRIMARY KEY AUTO_INCREMENT,
     nome_animale VARCHAR(50) NOT NULL,
@@ -70,27 +51,18 @@ CREATE TABLE Animale (
     FOREIGN KEY (ID_recinto) REFERENCES Recinto(ID_recinto) ON DELETE SET NULL
 );
 
--- =====================================================
--- TABELLA: TURNO
--- =====================================================
 CREATE TABLE Turno (
     data DATE NOT NULL,
     fascia_oraria VARCHAR(20) NOT NULL CHECK(fascia_oraria IN('mattina','pomeriggio')),
     PRIMARY KEY (data, fascia_oraria)
 );
 
--- =====================================================
--- TABELLA: MANSIONE
--- =====================================================
 CREATE TABLE Mansione (
     ID_mansione INT PRIMARY KEY AUTO_INCREMENT,
     descrizione VARCHAR(100) NOT NULL,
     tipo_mansione ENUM('volontario', 'veterinario') NOT NULL
 );
 
--- =====================================================
--- TABELLA: CONTROLLO_SANITARIO
--- =====================================================
 CREATE TABLE Controllo_Sanitario (
     ID_controllo INT PRIMARY KEY AUTO_INCREMENT,
     data DATE NOT NULL,
@@ -112,9 +84,6 @@ CREATE TABLE Controllo_Sanitario (
     FOREIGN KEY (ID_veterinario) REFERENCES Utente(ID_utente) ON DELETE RESTRICT
 );
 
--- =====================================================
--- TABELLA: TERAPIA
--- =====================================================
 CREATE TABLE Terapia (
     ID_terapia INT PRIMARY KEY AUTO_INCREMENT,
     farmaco VARCHAR(100) NOT NULL,
@@ -158,11 +127,6 @@ CREATE TABLE Svolgimento (
     FOREIGN KEY (data, fascia_oraria) REFERENCES Turno(data, fascia_oraria) ON DELETE CASCADE
 );
 
--- =====================================================
--- TABELLA: assegnazione_mansione (ex Affidato)
--- FIX: rinominata da 'Affidato' a 'assegnazione_mansione'
---      aggiunta colonna 'ID_utente' per la query LIST_MANSIONI_BY_UTENTE
--- =====================================================
 CREATE TABLE assegnazione_mansione (
     ID_utente INT NOT NULL,
     ID_mansione INT NOT NULL,
@@ -172,9 +136,6 @@ CREATE TABLE assegnazione_mansione (
     FOREIGN KEY (ID_mansione) REFERENCES Mansione(ID_mansione) ON DELETE CASCADE
 );
 
--- =====================================================
--- TABELLA: ASSEGNATO (Relazione Mansione-Recinto)
--- =====================================================
 CREATE TABLE Assegnato (
     ID_mansione INT NOT NULL,
     ID_recinto INT NOT NULL,
@@ -183,9 +144,6 @@ CREATE TABLE Assegnato (
     FOREIGN KEY (ID_recinto) REFERENCES Recinto(ID_recinto) ON DELETE CASCADE
 );
 
--- =====================================================
--- TABELLA: PREVISIONE (Relazione Trasporto-Mansione)
--- =====================================================
 CREATE TABLE Previsione (
     ID_trasporto INT NOT NULL,
     ID_mansione INT NOT NULL,
@@ -194,9 +152,6 @@ CREATE TABLE Previsione (
     FOREIGN KEY (ID_mansione) REFERENCES Mansione(ID_mansione) ON DELETE CASCADE
 );
 
--- =====================================================
--- INDICI PER OTTIMIZZAZIONE
--- =====================================================
 CREATE INDEX idx_animale_specie ON Animale(ID_specie);
 CREATE INDEX idx_animale_recinto ON Animale(ID_recinto);
 CREATE INDEX idx_animale_stato ON Animale(stato_di_salute);
@@ -208,15 +163,6 @@ CREATE INDEX idx_turno_data ON Turno(data);
 CREATE INDEX idx_utente_email ON Utente(email);
 CREATE INDEX idx_utente_ruolo ON Utente(ruolo);
 
--- =====================================================
--- FINE SCHEMA
--- =====================================================
-
--- =====================================================
--- INSERISCI DATI DI TEST
--- =====================================================
-
--- Inserisci Utenti
 INSERT INTO Utente (nome, cognome, email, password, ruolo) 
 VALUES ('Mario', 'Rossi', 'veterinario@zoo.it', 'pass', 'veterinario');
 
@@ -229,20 +175,17 @@ VALUES ('Giulia', 'Verdi', 'visitatore@zoo.it', 'pass', 'visitatore');
 INSERT INTO Utente (nome, cognome, email, password, ruolo) 
 VALUES ('Admin', 'Sistema', 'admin@zoo.it', 'pass', 'admin');
 
--- Inserisci Specie
 INSERT INTO Specie (nome_specie) VALUES ('Leone');
 INSERT INTO Specie (nome_specie) VALUES ('Elefante');
 INSERT INTO Specie (nome_specie) VALUES ('Pinguino');
 INSERT INTO Specie (nome_specie) VALUES ('Orso');
 INSERT INTO Specie (nome_specie) VALUES ('Tigre');
 
--- Inserisci Recinti (con capienza)
 INSERT INTO Recinto (tipo_recinto, capienza) VALUES ('Savana', 5);
 INSERT INTO Recinto (tipo_recinto, capienza) VALUES ('Foresta', 8);
 INSERT INTO Recinto (tipo_recinto, capienza) VALUES ('Acquatico', 6);
 INSERT INTO Recinto (tipo_recinto, capienza) VALUES ('Montagna', 4);
 
--- Inserisci Animali
 INSERT INTO Animale (nome_animale, eta, provenienza, stato_di_salute, descrizione, data_arrivo, ID_specie, ID_recinto) 
 VALUES ('Simba', 5, 'Kenya', 'buono', 'Leone africano maschio', '2021-03-10', 1, 1);
 
@@ -258,24 +201,20 @@ VALUES ('Bruno', 8, 'Russia', 'buono', 'Orso bruno maschio', '2020-05-15', 4, 4)
 INSERT INTO Animale (nome_animale, eta, provenienza, stato_di_salute, descrizione, data_arrivo, ID_specie, ID_recinto) 
 VALUES ('Raja', 6, 'India', 'discreto', 'Tigre del Bengala maschio', '2022-09-20', 5, 1);
 
--- Inserisci Turni
 INSERT INTO Turno (data, fascia_oraria) VALUES (CURDATE(), 'mattina');
 INSERT INTO Turno (data, fascia_oraria) VALUES (CURDATE(), 'pomeriggio');
 INSERT INTO Turno (data, fascia_oraria) VALUES (DATE_ADD(CURDATE(), INTERVAL 1 DAY), 'mattina');
 INSERT INTO Turno (data, fascia_oraria) VALUES (DATE_ADD(CURDATE(), INTERVAL 1 DAY), 'pomeriggio');
 INSERT INTO Turno (data, fascia_oraria) VALUES (DATE_ADD(CURDATE(), INTERVAL 2 DAY), 'mattina');
 
--- Inserisci Mansioni per VOLONTARI
 INSERT INTO Mansione (descrizione, tipo_mansione) VALUES ('Pulizia recinto', 'volontario');
 INSERT INTO Mansione (descrizione, tipo_mansione) VALUES ('Distribuzione cibo e acqua', 'volontario');
 INSERT INTO Mansione (descrizione, tipo_mansione) VALUES ('Manutenzione recinto', 'volontario');
 
--- Inserisci Mansioni per VETERINARI
 INSERT INTO Mansione (descrizione, tipo_mansione) VALUES ('Somministrazione medicinali', 'veterinario');
 INSERT INTO Mansione (descrizione, tipo_mansione) VALUES ('Visita animali', 'veterinario');
 INSERT INTO Mansione (descrizione, tipo_mansione) VALUES ('Assistenza veterinaria', 'veterinario');
 
--- Assegna Turni (SVOLGIMENTO)
 INSERT INTO Svolgimento (ID_utente, data, fascia_oraria) 
 VALUES (1, CURDATE(), 'mattina');
 
@@ -288,7 +227,6 @@ VALUES (1, DATE_ADD(CURDATE(), INTERVAL 1 DAY), 'mattina');
 INSERT INTO Svolgimento (ID_utente, data, fascia_oraria) 
 VALUES (2, DATE_ADD(CURDATE(), INTERVAL 1 DAY), 'pomeriggio');
 
--- Assegna Mansioni agli Utenti (assegnazione_mansione, ex Affidato)
 INSERT INTO assegnazione_mansione (ID_utente, ID_mansione, recinto) VALUES (2, 1, 'Savana (ID: 1)');
 INSERT INTO assegnazione_mansione (ID_utente, ID_mansione, recinto) VALUES (2, 2, 'Foresta (ID: 2)');
 INSERT INTO assegnazione_mansione (ID_utente, ID_mansione, recinto) VALUES (2, 3, 'Acquatico (ID: 3)');
@@ -296,7 +234,6 @@ INSERT INTO assegnazione_mansione (ID_utente, ID_mansione, recinto) VALUES (1, 4
 INSERT INTO assegnazione_mansione (ID_utente, ID_mansione, recinto) VALUES (1, 5, 'Foresta (ID: 2)');
 INSERT INTO assegnazione_mansione (ID_utente, ID_mansione, recinto) VALUES (1, 6, 'Montagna (ID: 4)');
 
--- Inserisci Controlli Sanitari
 INSERT INTO Controllo_Sanitario (data, ora, tipologia, esito, ID_animale, ID_veterinario) 
 VALUES (CURDATE(), CURTIME(), 'visita di routine', 'positivo', 1, 1);
 
@@ -312,7 +249,6 @@ VALUES (DATE_SUB(CURDATE(), INTERVAL 5 DAY), '09:15:00', 'visita di routine', 'p
 INSERT INTO Controllo_Sanitario (data, ora, tipologia, esito, ID_animale, ID_veterinario) 
 VALUES (DATE_SUB(CURDATE(), INTERVAL 3 DAY), '11:45:00', 'monitoraggio terapia', 'positivo', 5, 1);
 
--- Inserisci Terapie
 INSERT INTO Terapia (farmaco, dosaggio, durata, data_inizio, data_fine, ID_controllo) 
 VALUES ('Antibiotico A', '500mg', '7 giorni', CURDATE(), DATE_ADD(CURDATE(), INTERVAL 7 DAY), 1);
 
@@ -322,21 +258,18 @@ VALUES ('Vitamine', '100ml', '14 giorni', DATE_SUB(CURDATE(), INTERVAL 2 DAY), D
 INSERT INTO Terapia (farmaco, dosaggio, durata, data_inizio, data_fine, ID_controllo) 
 VALUES ('Antinfiammatorio', '250mg', '5 giorni', DATE_SUB(CURDATE(), INTERVAL 1 DAY), DATE_ADD(CURDATE(), INTERVAL 4 DAY), 3);
 
--- Inserisci Movimentazioni (tabella rinominata, colonna rinominata)
 INSERT INTO Movimentazione (data_movimentazione, motivazione, ID_animale, ID_recinto_destinazione, ID_recinto_provenienza) 
 VALUES (DATE_SUB(CURDATE(), INTERVAL 10 DAY), 'Trasferimento per ampliamento recinto', 1, 2, 1);
 
 INSERT INTO Movimentazione (data_movimentazione, motivazione, ID_animale, ID_recinto_destinazione, ID_recinto_provenienza) 
 VALUES (DATE_SUB(CURDATE(), INTERVAL 5 DAY), 'Migliore spazio per recupero', 3, 4, 3);
 
--- Inserisci Trasporti Esterni (colonna data rinominata, ID_volontario aggiunto)
 INSERT INTO Trasporto_Esterno (destinazione, data_trasporto, motivazione, mezzo_di_trasporto, ID_animale, ID_volontario) 
 VALUES ('Clinica Veterinaria Centro', DATE_SUB(CURDATE(), INTERVAL 8 DAY), 'Controllo approfondito', 'ambulanza veterinaria', 2, 2);
 
 INSERT INTO Trasporto_Esterno (destinazione, data_trasporto, motivazione, mezzo_di_trasporto, ID_animale, ID_volontario) 
 VALUES ('Ospedale Animali Specializzato', DATE_SUB(CURDATE(), INTERVAL 15 DAY), 'Intervento chirurgico', 'ambulanza veterinaria', 4, 2);
 
--- Inserisci Previsioni (Trasporto-Mansione)
 INSERT INTO Previsione (ID_trasporto, ID_mansione) VALUES (1, 3);
 INSERT INTO Previsione (ID_trasporto, ID_mansione) VALUES (1, 2);
 INSERT INTO Previsione (ID_trasporto, ID_mansione) VALUES (2, 3);

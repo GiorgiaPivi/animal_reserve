@@ -8,7 +8,7 @@ import java.util.Optional;
 
 public interface Model {
 
-    // ------- Utente -------
+    //Utente
 
     Optional<Utente> login(String email, String password);
 
@@ -20,13 +20,13 @@ public interface Model {
 
     List<Utente> listStaff();
 
-    // ------- Specie -------
+    //Specie
 
     List<Specie> specie();
 
     int contaAnimaliPerSpecie(int idSpecie);
 
-    // ------- Animale -------
+    //Animale
 
     List<Animale> animali();
 
@@ -48,14 +48,14 @@ public interface Model {
 
     List<Animale> animaliDaControllare();
 
-    // ------- Controllo Sanitario -------
+    //Controllo Sanitario
 
     int insertControllo(LocalDate data, LocalTime ora, String tipologia,
                         String esito, int idAnimale, int idVeterinario);
 
     List<ControlloSanitario> storicoControlli(int idAnimale);
 
-    // ------- Terapia -------
+    //Terapia
 
     int insertTerapia(String farmaco, String dosaggio, String durata,
                       LocalDate dataInizio, LocalDate dataFine, int idControllo);
@@ -64,7 +64,7 @@ public interface Model {
 
     List<Terapia> terapieByControllo(int idControllo);
 
-    // ------- Recinto -------
+    //Recinto
 
     List<Recinto> recinti();
 
@@ -76,13 +76,13 @@ public interface Model {
 
     void updateRecintoAnimale(int idAnimale, int idRecinto);
 
-    // ------- Movimentazione -------
+    //Movimentazione
 
     int insertMovimentazione(LocalDate dataMovimentazione, int idAnimale, int idRecintoDestinazione);
 
     List<Movimentazione> movimentazioniByAnimale(int idAnimale);
 
-    // ------- Trasporto Esterno -------
+    //Trasporto Esterno
 
     int insertTrasporto(LocalDate dataTrasporto, String destinazione, String motivazione,
                         int idAnimale, int idVolontario);
@@ -91,7 +91,7 @@ public interface Model {
 
     List<TrasportoEsterno> allTrasporti();
 
-    // ------- Statistiche -------
+    //Statistiche
 
     int contaAnimaliTotali();
 
@@ -103,7 +103,7 @@ public interface Model {
 
     java.util.Map<String, Object> statisticheSanitarie();
 
-    // ------- Admin Operations -------
+    //Operazioni Admin
 
     void insertSpecie(String nome);
 
@@ -115,8 +115,6 @@ public interface Model {
 
     void insertMansione(String descrizione, String tipoMansione);
 
-    // ------- Factory -------
-
     static Model fromConnection(Connection connection) {
         return new DBModel(connection);
     }
@@ -125,7 +123,7 @@ public interface Model {
         return new MockedModel();
     }
 
-    // ------ Turni -------
+    //Turni 
     List<Turno> turni();
 
     List<Turno> turniByUtente(int idUtente);
@@ -133,7 +131,7 @@ public interface Model {
     List<String> turniConAssegnati();
 
 
-    // ----- Mansioni -----
+    //Mansioni
     List<Mansione> mansioni();
 
     List<Mansione> mansioniByUtente(int idUtente);

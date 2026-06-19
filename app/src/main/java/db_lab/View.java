@@ -11,16 +11,12 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.IntUnaryOperator;
 
-/**
- * View
- */
 public final class View extends JFrame {
-    // Palette colori
-    private static final Color PRIMARY_COLOR = new Color(41, 128, 185);      // Blu acceso
-    private static final Color SECONDARY_COLOR = new Color(52, 152, 219);    // Blu più chiaro
-    private static final Color BACKGROUND_COLOR = new Color(236, 240, 241);  // Grigio chiaro
-    private static final Color TEXT_COLOR = new Color(44, 62, 80);           // Grigio scuro
-    private static final Color BORDER_COLOR = new Color(189, 195, 199);      // Grigio neutro
+    private static final Color PRIMARY_COLOR = new Color(41, 128, 185);
+    private static final Color SECONDARY_COLOR = new Color(52, 152, 219);
+    private static final Color BACKGROUND_COLOR = new Color(236, 240, 241);
+    private static final Color TEXT_COLOR = new Color(44, 62, 80);
+    private static final Color BORDER_COLOR = new Color(189, 195, 199);
    
     private Optional<Controller> controller;
     private final JPanel mainPanel;
@@ -32,7 +28,6 @@ public final class View extends JFrame {
         this.cardLayout = new CardLayout();
         this.mainPanel = new JPanel(cardLayout);
         
-        // Configurazione JFrame
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setSize(1200, 800);
         this.setLocationRelativeTo(null);
@@ -50,9 +45,7 @@ public final class View extends JFrame {
     private Controller getController() {
         return controller.orElseThrow();
     }
-    
-    // ============ UTILITY METHODS ============
-    
+        
     private void showPage(String pageName, JPanel panel) {
         mainPanel.add(panel, pageName);
         cardLayout.show(mainPanel, pageName);
@@ -136,9 +129,7 @@ public final class View extends JFrame {
         label.setAlignmentX(Component.LEFT_ALIGNMENT);
         return label;
     }
-    
-    // ============ PAGES ============
-    
+        
     public void loadingAnimali() {
         JPanel panel = createCenteredPanel();
         JLabel loadingLabel = new JLabel("Caricamento animali...");
@@ -158,9 +149,7 @@ public final class View extends JFrame {
     public void genericMessage(String msg) {
         JOptionPane.showMessageDialog(this, msg, "Messaggio", JOptionPane.INFORMATION_MESSAGE);
     }
-    
-    // ============ LOGIN ============
-    
+        
     public void loginPage() {
         JPanel outerPanel = new JPanel(new GridBagLayout());
         outerPanel.setBackground(BACKGROUND_COLOR);
@@ -260,9 +249,7 @@ public final class View extends JFrame {
         genericError(reason);
         loginPage();
     }
-    
-    // ============ REGISTRAZIONE ============
-    
+        
     public void registrazionePage() {
         JPanel panel = createCenteredPanel();
         
@@ -340,7 +327,6 @@ public final class View extends JFrame {
             new EmptyBorder(15, 15, 15, 15)
         ));
         
-        // USA mansioniFiltratre INVECE DI mansioni:
         for (Object mansione : mansioniFiltratre) {
             JLabel mansioneLabe = new JLabel(mansione.toString());
             mansioneLabe.setFont(new Font("Segoe UI", Font.PLAIN, 13));
@@ -361,14 +347,11 @@ public final class View extends JFrame {
         
         showPage("mansioni", outerPanel);
     }
-    
-    // ============ LISTA ANIMALI ============
-    
+        
     public void animaliPage(List<Animale> animali, Utente utente) {
         JPanel mainContent = new JPanel(new BorderLayout());
         mainContent.setBackground(BACKGROUND_COLOR);
 
-        // ---- HEADER ----
         JPanel header = new JPanel(new BorderLayout());
         header.setBackground(PRIMARY_COLOR);
         header.setBorder(new EmptyBorder(15, 25, 15, 25));
@@ -390,7 +373,6 @@ public final class View extends JFrame {
 
         mainContent.add(header, BorderLayout.NORTH);
 
-        // ---- LISTA ANIMALI ----
         JPanel listPanel = new JPanel();
         listPanel.setLayout(new BoxLayout(listPanel, BoxLayout.Y_AXIS));
         listPanel.setBackground(BACKGROUND_COLOR);
@@ -443,7 +425,6 @@ public final class View extends JFrame {
         scrollPane.getVerticalScrollBar().setUnitIncrement(16);
         mainContent.add(scrollPane, BorderLayout.CENTER);
 
-        // ---- BARRA AZIONI ----
         JPanel actionsBar = new JPanel(new BorderLayout());
         actionsBar.setBackground(Color.WHITE);
         actionsBar.setBorder(BorderFactory.createCompoundBorder(
@@ -451,7 +432,6 @@ public final class View extends JFrame {
             new EmptyBorder(12, 25, 12, 25)
         ));
 
-        // Gruppo sinistra — operazioni principali
         JPanel left = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
         left.setBackground(Color.WHITE);
         if (utente.isVeterinario()) {
@@ -462,7 +442,6 @@ public final class View extends JFrame {
         left.add(createButton("Trasporti", () -> getController().userClickedTuttiTrasporti()));
         left.add(createButton("Statistiche", () -> getController().userClickedStatisticheGenerali()));
 
-        // Gruppo destra — funzioni staff
         JPanel right = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
         right.setBackground(Color.WHITE);
         if (utente.isVeterinario()) {
@@ -614,13 +593,11 @@ public final class View extends JFrame {
 
         var staff = getController().getStaff();
 
-        // Filtra per tipo iniziale (volontario)
         JComboBox<Utente> utenteCombo = new JComboBox<>();
         staff.stream()
             .filter(u -> "volontario".equalsIgnoreCase(u.ruolo))
             .forEach(utenteCombo::addItem);
 
-        // Aggiorna il combo utenti quando cambia il tipo
         tipoCombo.addActionListener(e -> {
             String tipoSel = (String) tipoCombo.getSelectedItem();
             utenteCombo.removeAllItems();
@@ -629,7 +606,6 @@ public final class View extends JFrame {
                 .forEach(utenteCombo::addItem);
         });
 
-        // Combo recinto
         var recinti = getController().getRecintiDisponibili();
         JComboBox<String> recintoCombo = new JComboBox<>();
         recinti.forEach(r -> recintoCombo.addItem(r.tipologia + " (ID: " + r.id + ")"));
@@ -768,9 +744,7 @@ public final class View extends JFrame {
         
         showPage("nuovoPersonale", outerPanel);
     }
-    
-    // ============ DETTAGLIO ANIMALE ============
-    
+        
     public void dettaglioAnimale(Animale a, Utente u) {
         JPanel outerPanel = new JPanel(new BorderLayout());
         outerPanel.setBackground(BACKGROUND_COLOR);
@@ -784,7 +758,6 @@ public final class View extends JFrame {
         panel.add(titleLabel);
         panel.add(Box.createVerticalStrut(20));
 
-        // ---- INFO BOX ----
         JPanel infoBox = new JPanel(new GridLayout(0, 2, 10, 10));
         infoBox.setBackground(Color.WHITE);
         infoBox.setBorder(BorderFactory.createCompoundBorder(
@@ -825,7 +798,6 @@ public final class View extends JFrame {
         panel.add(infoBox);
         panel.add(Box.createVerticalStrut(25));
 
-        // ---- SEZIONE VETERINARIO ----
         if (u.isVeterinario()) {
             JPanel sectionVet = new JPanel();
             sectionVet.setLayout(new BoxLayout(sectionVet, BoxLayout.Y_AXIS));
@@ -945,7 +917,6 @@ public final class View extends JFrame {
             panel.add(Box.createVerticalStrut(25));
         }
 
-        // ---- SEZIONE SPOSTA RECINTO ----
         if (u.isVolontario() || u.isVeterinario()) {
             JPanel sectionRecinto = new JPanel();
             sectionRecinto.setLayout(new BoxLayout(sectionRecinto, BoxLayout.Y_AXIS));
@@ -999,9 +970,7 @@ public final class View extends JFrame {
 
         showPage("dettaglio", outerPanel);
     }
-    
-    // ============ SPECIE ============
-    
+        
     public void speciePage(List<Specie> specie, IntUnaryOperator conta) {
         JPanel outerPanel = new JPanel(new BorderLayout());
         outerPanel.setBackground(BACKGROUND_COLOR);
@@ -1010,14 +979,12 @@ public final class View extends JFrame {
         panel.setBackground(BACKGROUND_COLOR);
         panel.setBorder(new EmptyBorder(30, 25, 30, 25));
 
-        // Titolo
         JLabel title = new JLabel("Elenco Specie");
         title.setFont(new Font("Segoe UI", Font.BOLD, 24));
         title.setForeground(PRIMARY_COLOR);
         title.setBorder(new EmptyBorder(0, 0, 15, 0));
         panel.add(title, BorderLayout.NORTH);
 
-        // Lista specie
         JPanel listPanel = new JPanel();
         listPanel.setLayout(new BoxLayout(listPanel, BoxLayout.Y_AXIS));
         listPanel.setBackground(BACKGROUND_COLOR);
@@ -1048,7 +1015,6 @@ public final class View extends JFrame {
             listPanel.add(Box.createVerticalStrut(6));
         }
 
-        // Bottone indietro
         JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 15));
         bottomPanel.setBackground(BACKGROUND_COLOR);
         bottomPanel.add(createButton("← Indietro", () -> getController().userClickedBack()));
@@ -1063,9 +1029,7 @@ public final class View extends JFrame {
 
         showPage("specie", outerPanel);
     }
-    
-    // ============ NUOVO ANIMALE ============
-    
+        
     public void nuovoAnimaleForm(List<Specie> specie) {
         JPanel outerPanel = new JPanel(new BorderLayout());
         outerPanel.setBackground(BACKGROUND_COLOR);
@@ -1082,11 +1046,9 @@ public final class View extends JFrame {
         var recinti = getController().getRecintiDisponibili();
         JComboBox<Recinto> recintoCombo = new JComboBox<>(recinti.toArray(new Recinto[0]));
 
-        // Combo stato di salute
         JComboBox<String> statoCombo = new JComboBox<>(new String[]{"buono", "discreto", "critico"});
         JComboBox<String> sessoCombo = new JComboBox<>(new String[]{"M", "F"});
 
-        // Combo provenienza con campo "altro"
         String[] provenienze = {"Zoo", "Abbandono", "Altro parco naturale", "Sequestro", "Selvatico", "Privato", "Altro"};
         JComboBox<String> provenienzaCombo = new JComboBox<>(provenienze);
         JTextField provenienzaAltro = new JTextField(20);
@@ -1166,9 +1128,7 @@ public final class View extends JFrame {
     public void controlloRegistrato(int id) {
         genericMessage("Controllo registrato con ID: " + id);
     }
-    
-    // ============ STORICO CONTROLLI ============
-    
+        
     public void storicoControlliPage(List<ControlloSanitario> controlli) {
         JPanel outerPanel = new JPanel(new BorderLayout());
         outerPanel.setBackground(BACKGROUND_COLOR);
@@ -1211,7 +1171,6 @@ public final class View extends JFrame {
         genericMessage("Terapia registrata con ID: " + id);
     }
 
-    // ============ STORICO MOVIMENTAZIONI ============
     public void storicoMovimentazioniPage(List<Movimentazione> movimentazioni) {
         JPanel outerPanel = new JPanel(new BorderLayout());
         outerPanel.setBackground(BACKGROUND_COLOR);
@@ -1257,9 +1216,7 @@ public final class View extends JFrame {
         
         showPage("storico_movimentazioni", outerPanel);
     }
-    
-    // ============ LISTE GENERICHE ============
-    
+        
     public void movimentazioniPage(List<?> mov) {
         showGenericListPage("Movimentazioni", mov);
     }
@@ -1313,9 +1270,7 @@ public final class View extends JFrame {
         
         showPage(title.toLowerCase(), outerPanel);
     }
-    
-    // ============ DETTAGLIO RECINTO ============
-    
+        
     public void dettaglioRecinto(Object recinto, int numAnimali) {
         JPanel outerPanel = new JPanel(new BorderLayout());
         outerPanel.setBackground(BACKGROUND_COLOR);
@@ -1347,9 +1302,7 @@ public final class View extends JFrame {
         
         showPage("dettaglioRecinto", panel);
     }
-    
-    // ============ STATISTICHE ============
-    
+        
     public void showStatistiche(Map<String, Object> stats) {
         JPanel outerPanel = new JPanel(new BorderLayout());
         outerPanel.setBackground(BACKGROUND_COLOR);

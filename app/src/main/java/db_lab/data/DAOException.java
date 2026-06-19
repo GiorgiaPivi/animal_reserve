@@ -4,7 +4,6 @@ import java.io.Serial;
 
 // Eccezione runtime usata per incapsulare tutte le eccezioni provenienti dai DAO,
 // in modo da non far emergere SQLException nel resto del codice.
-//
 public final class DAOException extends RuntimeException {
 
     @Serial

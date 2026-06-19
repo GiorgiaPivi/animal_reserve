@@ -101,18 +101,18 @@ public final class MockedModel implements Model {
         this.mansioneAssegnazioni = new HashMap<>();
 
         // Assegna alcuni turni e mansioni di test
-        turnoAssegnazioni.put(0, 1); // Indice 0 assegnato a utente 1 (veterinario) - turno
-        turnoAssegnazioni.put(1, 2); // Indice 1 assegnato a utente 2 (volontario) - turno
+        turnoAssegnazioni.put(0, 1);
+        turnoAssegnazioni.put(1, 2);
 
         // Assegna mansioni da volontario all'utente 2 (volontario)
-        mansioneAssegnazioni.put(0, 2); // Laura (utente 2) - Pulizia recinti (ID 1)
-        mansioneAssegnazioni.put(1, 2); // Laura (utente 2) - Alimentazione animali (ID 2)
-        mansioneAssegnazioni.put(2, 2); // Laura (utente 2) - Manutenzione recinto (ID 3)
+        mansioneAssegnazioni.put(0, 2);
+        mansioneAssegnazioni.put(1, 2);
+        mansioneAssegnazioni.put(2, 2);
 
         // Assegna mansioni da veterinario all'utente 1 (veterinario)
-        mansioneAssegnazioni.put(3, 1); // Mario (utente 1) - Somministrazione medicinali (ID 4)
-        mansioneAssegnazioni.put(4, 1); // Mario (utente 1) - Visita animali (ID 5)
-        mansioneAssegnazioni.put(5, 1); // Mario (utente 1) - Assistenza veterinaria (ID 6)
+        mansioneAssegnazioni.put(3, 1);
+        mansioneAssegnazioni.put(4, 1);
+        mansioneAssegnazioni.put(5, 1); 
     }
 
     @Override
@@ -397,7 +397,7 @@ public final class MockedModel implements Model {
             }
         }
 
-        // Se il turno non esiste, lo creo
+        // Crea nuovo turno se non esiste
         Turno nuovo = new Turno(data, fascia);
         turni.add(nuovo);
         turnoAssegnazioni.put(turni.size() - 1, idUtente);
@@ -436,7 +436,7 @@ public final class MockedModel implements Model {
 
     @Override
     public void updateRecintoAnimale(int idAnimale, int idRecinto) {
-        // mock: non fa nulla
+        // mock
     }
 
     @Override

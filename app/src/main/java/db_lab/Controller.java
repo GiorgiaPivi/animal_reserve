@@ -26,16 +26,15 @@ public final class Controller {
         this.utenteCorrente = Optional.empty();
     }
 
-    // ------- Avvio -------
+    //Avvio
 
     public void userRequestedInitialPage() {
         this.view.loginPage();
     }
 
-    // ------- Login / Registrazione -------
+    //Login/Registrazione
 
     public void userSubmittedLogin(String email, String password) {
-        // Validazione input
         if (email == null || email.trim().isEmpty()) {
             this.view.loginFailed("Email obbligatoria.");
             return;
@@ -108,7 +107,7 @@ public final class Controller {
         this.view.loginPage();
     }
 
-    // ------- Lista Animali (pagina principale dopo login) -------
+    //Lista Animali
 
     public void userClickedReloadAnimali() {
         this.loadAnimaliPage();
@@ -138,7 +137,6 @@ public final class Controller {
             return;
         }
         if (stato == null || stato.trim().isEmpty()) {
-            // Se stato vuoto, carica tutti gli animali
             this.loadAnimaliPage();
             return;
         }
@@ -164,7 +162,7 @@ public final class Controller {
         }
     }
 
-    // ------- Specie -------
+    //Specie
 
     public void userClickedSpecie() {
         try {
@@ -175,7 +173,7 @@ public final class Controller {
         }
     }
 
-    // ------- Operazioni Staff (volontario/veterinario) -------
+    //Operazioni personale
 
     public void userRequestedNuovoAnimale() {
         try {
@@ -188,7 +186,6 @@ public final class Controller {
 
     public void userSubmittedNuovoAnimale(String nome, int eta, String provenienza,
         String statoDiSalute, String descrizione, int idSpecie, int idRecinto, String sesso) {
-        // Validazione input
         if (nome == null || nome.trim().isEmpty()) {
             this.view.genericError("Il nome dell'animale è obbligatorio.");
             return;
@@ -222,11 +219,10 @@ public final class Controller {
         }
     }
 
-    // ------- Operazioni Veterinario -------
+    //Operazioni Veterinario
 
     public void userSubmittedNuovoControllo(int idAnimale, String tipologia,
             String esito) {
-        // Validazione input
         if (tipologia == null || tipologia.trim().isEmpty()) {
             this.view.genericError("La tipologia del controllo è obbligatoria.");
             return;
@@ -301,7 +297,7 @@ public final class Controller {
         }
     }
 
-    // ------- Back -------
+    //Back
 
     public void userClickedBack() {
         try {
@@ -319,8 +315,6 @@ public final class Controller {
             this.view.genericError("Errore nel ritorno alla pagina precedente.");
         }
     }
-
-    // ------- Private helpers -------
 
     private void loadAnimaliPage() {
         try {
@@ -388,7 +382,7 @@ public final class Controller {
         }
     }
 
-    // ------- Recinti -------
+    //Recinti
 
     public void userClickedRecinti() {
         try {
@@ -422,24 +416,21 @@ public final class Controller {
         }
     }
 
-    // ------- Movimentazioni -------
+    //Movimentazioni
 
     public void userSubmittedMovimentazione(int idAnimale, int idRecintoDestinazione) {
-        // Validazione
         if (idAnimale <= 0 || idRecintoDestinazione <= 0) {
             this.view.genericError("Dati movimentazione non validi.");
             return;
         }
 
         try {
-            // Verifica che il recinto esista
             var recinto = this.model.findRecinto(idRecintoDestinazione);
             if (recinto.isEmpty()) {
                 this.view.genericError("Recinto di destinazione non trovato.");
                 return;
             }
 
-            // Verifica capienza
             int occupazione = this.model.contaAnimaliInRecinto(idRecintoDestinazione);
             if (occupazione >= recinto.get().capienza) {
                 this.view.genericError("Recinto pieno: non è possibile spostare l'animale.");
@@ -464,10 +455,9 @@ public final class Controller {
         }
     }
 
-    // ------- Trasporti Esterni -------
+    //Trasporti Esterni
 
     public void userSubmittedTrasporto(String destinazione, String motivazione, int idAnimale) {
-        // Validazione
         if (destinazione == null || destinazione.trim().isEmpty()) {
             this.view.genericError("La destinazione è obbligatoria.");
             return;
@@ -508,7 +498,7 @@ public final class Controller {
         }
     }
 
-    // ------- Terapie -------
+    //Terapie
 
     public void userClickedTerapieAnimale(int idAnimale) {
         try {
@@ -528,7 +518,7 @@ public final class Controller {
         }
     }
 
-    // ------- Validazione permessi utente -------
+    //Validazione permessi utente
 
     public boolean isVeterinario() {
         return this.utenteCorrente.isPresent() && 

@@ -15,10 +15,10 @@ public final class Mansione {
 
     public final int id;
     public final String descrizione;
-    public final String tipoMansione;  // NUOVO CAMPO
+    public final String tipoMansione; 
 
     public Mansione(int id, String descrizione) {
-        this(id, descrizione, "volontario");  // Default a volontario per compatibilità
+        this(id, descrizione, "volontario"); 
     }
 
     public Mansione(int id, String descrizione, String tipoMansione) {
@@ -52,11 +52,8 @@ public final class Mansione {
         ));
     }
 
-    // ---------------- DAO ----------------
-
     public static final class DAO {
 
-        /** Inserisce una nuova mansione */
        public static void insert(Connection connection, String descrizione, String tipoMansione) {
             try (var stmt = connection.prepareStatement(Queries.INSERT_MANSIONE)) {
                 stmt.setString(1, descrizione);
@@ -79,7 +76,6 @@ public final class Mansione {
             }
         }
 
-        /** Lista tutte le mansioni presenti nel sistema */
         public static List<Mansione> list(Connection connection) {
             try (var stmt = DAOUtils.prepare(connection, Queries.LIST_MANSIONI);
                  var rs = stmt.executeQuery()) {
@@ -89,7 +85,7 @@ public final class Mansione {
                     mansioni.add(new Mansione(
                         rs.getInt("ID_mansione"),
                         rs.getString("descrizione"),
-                        rs.getString("tipo_mansione")  // LEGGI IL TIPO
+                        rs.getString("tipo_mansione")
                     ));
                 }
                 return mansioni;
@@ -108,7 +104,7 @@ public final class Mansione {
                     mansioni.add(new Mansione(
                         rs.getInt("ID_mansione"),
                         rs.getString("descrizione"),
-                        rs.getString("tipo_mansione")  // LEGGI IL TIPO
+                        rs.getString("tipo_mansione")
                     ));
                 }
                 return mansioni;

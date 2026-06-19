@@ -18,7 +18,7 @@ public class Utente {
     public final String cognome;
     public final String email;
     public final String password;
-    public final String ruolo; // visitatore, volontario, veterinario
+    public final String ruolo;
 
     public Utente(int id, String nome, String cognome, String email, String password, String ruolo) {
         this.id = id;
@@ -128,7 +128,6 @@ public class Utente {
             }
         }
 
-        // Lista tutti gli utenti
         public static List<Utente> list(Connection connection) {
             try (var statement = DAOUtils.prepare(connection, Queries.LIST_UTENTI);
                  var rs = statement.executeQuery()) {
