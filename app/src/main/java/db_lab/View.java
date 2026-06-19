@@ -945,41 +945,6 @@ public final class View extends JFrame {
             panel.add(Box.createVerticalStrut(25));
         }
 
-        // ---- SEZIONE AGGIORNA STATO ----
-        if (u.isVolontario() || u.isVeterinario()) {
-            JPanel sectionStato = new JPanel();
-            sectionStato.setLayout(new BoxLayout(sectionStato, BoxLayout.Y_AXIS));
-            sectionStato.setBackground(Color.WHITE);
-            sectionStato.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(BORDER_COLOR, 1),
-                new EmptyBorder(20, 25, 20, 25)
-            ));
-
-            sectionStato.add(createSubtitleLabel("Aggiorna Stato di Salute"));
-            sectionStato.add(Box.createVerticalStrut(15));
-
-            JPanel statoRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 5));
-            statoRow.setBackground(Color.WHITE);
-            JLabel statoLabel = new JLabel("Nuovo Stato:  ");
-            statoLabel.setFont(new Font("Segoe UI", Font.BOLD, 12));
-            JComboBox<String> nuovoStato = new JComboBox<>(new String[]{"buono", "discreto", "critico"});
-            nuovoStato.setSelectedItem(a.statoDiSalute);
-            statoRow.add(statoLabel);
-            statoRow.add(nuovoStato);
-            sectionStato.add(statoRow);
-
-            sectionStato.add(Box.createVerticalStrut(15));
-            JPanel btnStato = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
-            btnStato.setBackground(Color.WHITE);
-            btnStato.add(createButton("Salva stato", () ->
-                getController().userSubmittedAggiornaStato(a.id, (String) nuovoStato.getSelectedItem())
-            ));
-            sectionStato.add(btnStato);
-
-            panel.add(sectionStato);
-            panel.add(Box.createVerticalStrut(25));
-        }
-
         // ---- SEZIONE SPOSTA RECINTO ----
         if (u.isVolontario() || u.isVeterinario()) {
             JPanel sectionRecinto = new JPanel();
@@ -1007,7 +972,7 @@ public final class View extends JFrame {
                 sectionRecinto.add(recintoRow);
                 sectionRecinto.add(Box.createVerticalStrut(15));
 
-                JPanel btnRecinto = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+                JPanel btnRecinto = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
                 btnRecinto.setBackground(Color.WHITE);
                 btnRecinto.add(createButton("Sposta", () -> {
                     Recinto selezionato = (Recinto) recintoCombo.getSelectedItem();
@@ -1015,6 +980,8 @@ public final class View extends JFrame {
                         getController().userSubmittedMovimentazione(a.id, selezionato.id);
                     }
                 }));
+                btnRecinto.add(createButton("Storico movimentazioni", () ->
+                    getController().userClickedStoricoMovimentazioni(a.id)));
                 sectionRecinto.add(btnRecinto);
             }
 
@@ -1242,6 +1209,53 @@ public final class View extends JFrame {
     
     public void terapiaRegistrata(int id) {
         genericMessage("Terapia registrata con ID: " + id);
+    }
+
+    // ============ STORICO MOVIMENTAZIONI ============
+    public void storicoMovimentazioniPage(List<Movimentazione> movimentazioni) {
+        JPanel outerPanel = new JPanel(new BorderLayout());
+        outerPanel.setBackground(BACKGROUND_COLOR);
+        JPanel panel = createCenteredPanel();
+        
+        JLabel title = createTitleLabel("Storico Movimentazioni");
+        panel.add(title);
+        panel.add(Box.createVerticalStrut(20));
+        
+        JPanel movBox = new JPanel();
+        movBox.setLayout(new BoxLayout(movBox, BoxLayout.Y_AXIS));
+        movBox.setBackground(Color.WHITE);
+        movBox.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(BORDER_COLOR, 1),
+            new EmptyBorder(15, 15, 15, 15)
+        ));
+        
+        if (movimentazioni.isEmpty()) {
+            JLabel emptyLabel = new JLabel("Nessuna movimentazione registrata.");
+            emptyLabel.setFont(new Font("Segoe UI", Font.ITALIC, 13));
+            emptyLabel.setForeground(new Color(130, 140, 150));
+            movBox.add(emptyLabel);
+        } else {
+            for (Movimentazione m : movimentazioni) {
+                JLabel movLabel = new JLabel(m.dataMovimentazione + " → Recinto " + m.idRecintoDestinazione + 
+                                            " (" + m.tipoRecinto + ")");
+                movLabel.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+                movLabel.setForeground(TEXT_COLOR);
+                movBox.add(movLabel);
+                movBox.add(Box.createVerticalStrut(8));
+            }
+        }
+        
+        panel.add(movBox);
+        panel.add(Box.createVerticalStrut(20));
+        panel.add(createButton("← Indietro", () -> getController().userClickedBack()));
+        panel.add(Box.createVerticalGlue());
+        
+        JScrollPane scrollPane = new JScrollPane(panel);
+        scrollPane.setBackground(BACKGROUND_COLOR);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        outerPanel.add(scrollPane, BorderLayout.CENTER);
+        
+        showPage("storico_movimentazioni", outerPanel);
     }
     
     // ============ LISTE GENERICHE ============

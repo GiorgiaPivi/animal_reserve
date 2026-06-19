@@ -292,6 +292,15 @@ public final class Controller {
         }
     }
 
+    public void userClickedStoricoMovimentazioni1(int idAnimale) {
+        try {
+            var movimentazioni = this.model.movimentazioniByAnimale(idAnimale);
+            this.view.storicoMovimentazioniPage(movimentazioni);
+        } catch (DAOException e) {
+            this.view.genericError("Errore nel caricamento storico movimentazioni.");
+        }
+    }
+
     // ------- Back -------
 
     public void userClickedBack() {
